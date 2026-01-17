@@ -1,4 +1,4 @@
-body {
+/* body {
   font-family: system-ui, sans-serif;
   margin: 40px;
 }
@@ -7,4 +7,49 @@ button {
   padding: 10px 16px;
   font-size: 16px;
   cursor: pointer;
+} */
+
+/* Personal At-Home Trainer */
+.personal-at-home-trainer {
+    color: white;
+    font-size: 64px;
+    font-family: Gudea, sans-serif;
+    font-weight: 400;
+    word-wrap: break-word;
+}
+
+/* Summary */
+.summary {
+    color: white;
+    font-size: 40px;
+    font-family: Gudea, sans-serif;
+    font-weight: 400;
+    word-wrap: break-word;
+}
+
+/* Upload Video */
+.upload-video {
+    color: #3B413C;
+    font-size: 36px;
+    font-family: Gudea, sans-serif;
+    font-weight: 400;
+    word-wrap: break-word;
+}
+
+/* Dashboard */
+.dashboard {
+    color: #3B413C;
+    font-size: 36px;
+    font-family: Gudea, sans-serif;
+    font-weight: 400;
+    word-wrap: break-word;
+}
+
+/* Analyze */
+.analyze {
+    color: #3B413C;
+    font-size: 36px;
+    font-family: Gudea, sans-serif;
+    font-weight: 400;
+    word-wrap: break-word;
 }

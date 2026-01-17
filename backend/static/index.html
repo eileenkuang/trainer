@@ -1,15 +1,215 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-  <title>Hackathon App</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal At-Home Trainer</title>
+  <style>
+    body {
+      background-color: #9eb3b3;
+      font-family: sans-serif;
+      margin: 0;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 768px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 3rem;
+      font-style: italic;
+      color: #2d3b3b;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      border: none;
+      cursor: pointer;
+      background-color: #d4e4e4;
+      color: #2d3b3b;
+      margin: 0.5rem;
+    }
+
+    button:hover {
+      background-color: #c4d4d4;
+    }
+
+    #uploadBtn {
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+    }
+
+    #analyzeBtn {
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+    }
+
+    select {
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      border: 1px solid #2d3b3b;
+      background-color: #d4e4e4;
+      color: #2d3b3b;
+      width: 200px;
+      margin: 0;
+    }
+
+    .controls-container {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      align-items: center;
+      width: 100%;
+    }
+
+    .dashboard-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      border: 1px solid #2d3b3b;
+      background-color: #d4e4e4;
+      color: #2d3b3b;
+      cursor: pointer;
+      width: 200px;
+      margin: 0;
+    }
+
+    .dashboard-btn:hover {
+      background-color: #c4d4d4;
+    }
+
+    .video-container {
+      background-color: white;
+      border-radius: 0.5rem;
+      aspect-ratio: 16/9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    pre {
+      background-color: #9eb3b3;
+      color: #f0f5f5;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  </style>
 </head>
+
 <body>
-  <h1>Identity Demo</h1>
+  <div class="container">
+    <h1>MooseFit</h1>
 
-  <button id="pingBtn">Ping Backend</button>
-  <pre id="output"></pre>
+    <!-- Controls Container -->
+    <div class="controls-container">
+      <!-- Exercise Dropdown -->
+      <select id="exerciseSelect">
+        <option value="">Select Exercise</option>
+        <option value="Squat">Squat</option>
+        <option value="Deadlift">Deadlift</option>
+        <option value="Bench Press">Bench Press</option>
+        <option value="Shoulder Press">Shoulder Press</option>
+        <option value="Lunges">Lunges</option>
+        <option value="Plank">Plank</option>
+        <option value="Push-ups">Push-ups</option>
+        <option value="Pull-ups">Pull-ups</option>
+      </select>
 
-  <script src="main.js"></script>
+      <!-- Dashboard Button -->
+      <button class="dashboard-btn" id="dashboardBtn">Dashboard</button>
+    </div>
+
+    <!-- Video Upload -->
+    <div class="video-container" id="videoContainer">
+      <button id="uploadBtn">Upload Video</button>
+      <input type="file" id="videoInput" accept="video/*" style="display:none;">
+    </div>
+
+    <!-- Analyze Button -->
+    <div style="text-align: center; margin-bottom: 1rem;">
+      <button id="analyzeBtn">Analyze</button>
+    </div>
+
+    <!-- Output -->
+    <pre id="output"></pre>
+  </div>
+
+  <script>
+    const exercises = ["Squat", "Deadlift", "Bench Press", "Shoulder Press", "Lunges", "Plank", "Push-ups", "Pull-ups"];
+    let selectedExercise = "";
+    let videoFile = null;
+    let videoUrl = "";
+
+    const exerciseSelect = document.getElementById("exerciseSelect");
+    const videoInput = document.getElementById("videoInput");
+    const videoContainer = document.getElementById("videoContainer");
+    const output = document.getElementById("output");
+    const dashboardBtn = document.getElementById("dashboardBtn");
+
+    // Dropdown change
+    exerciseSelect.addEventListener("change", (e) => {
+      selectedExercise = e.target.value;
+    });
+
+    // Dashboard button click
+    dashboardBtn.addEventListener("click", () => {
+      // TODO: Implement dashboard functionality
+      console.log("Dashboard clicked");
+    });
+
+    // Upload button click
+    document.getElementById("uploadBtn").addEventListener("click", () => {
+      videoInput.click();
+    });
+
+    // Video selection
+    videoInput.addEventListener("change", (e) => {
+      videoFile = e.target.files[0];
+      if (videoFile) {
+        videoUrl = URL.createObjectURL(videoFile);
+        videoContainer.innerHTML = `<video src="${videoUrl}" controls></video>`;
+      }
+    });
+
+    // Analyze button
+    document.getElementById("analyzeBtn").addEventListener("click", async () => {
+      if (!videoFile || !selectedExercise) {
+        alert("Please select an exercise and upload a video first");
+        return;
+      }
+
+      // Example: send to backend (FastAPI)
+      const formData = new FormData();
+      formData.append("file", videoFile);
+      formData.append("exercise", selectedExercise);
+
+      try {
+        const res = await fetch("/api/analyze-video", {
+          method: "POST",
+          body: formData
+        });
+        const data = await res.json();
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        output.textContent = "Error: " + err;
+      }
+    });
+  </script>
 </body>
+
 </html>
