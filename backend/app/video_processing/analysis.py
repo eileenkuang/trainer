@@ -1,7 +1,12 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.ndimage import gaussian_filter1d
+
+try:
+    import matplotlib.pyplot as plt
+    HAS_MATPLOTLIB = True
+except ImportError:
+    HAS_MATPLOTLIB = False
 
 # Load the data
 file_path = 'pose_outputs/biomechanical_data.csv'
@@ -91,15 +96,19 @@ def extract_joint_angles(data):
 
     return angles
 
-# Calculate speed of keypoints as 3D Euclidean distance
+# Calculate speed and acceleration of keypoints as 3D Euclidean distance
 def calculate_speed(data):
     speeds = {}
+    accelerations = {}
+    signed_speeds_y = {}  # Signed y-velocity
     for column in data.columns:
         if '_x' in column:  # Only process x columns to avoid duplicates
             keypoint = column.replace('_x', '')  # Extract keypoint name
             
             if keypoint not in speeds:
                 speeds[keypoint] = []
+                accelerations[keypoint] = []
+                signed_speeds_y[keypoint] = []
             
             # Get x, y, z for current and next frame
             for i in range(len(data) - 1):
@@ -109,63 +118,125 @@ def calculate_speed(data):
                 time_diff = (data.loc[i+1, 'timestamp_ms'] - data.loc[i, 'timestamp_ms']) / 1000  # in seconds
                 speed = distance / time_diff if time_diff > 0 else 0
                 speeds[keypoint].append(speed)
+                
+                # Signed y-velocity (negative if moving down, positive up)
+                vel_y = (pos2[1] - pos1[1]) / time_diff if time_diff > 0 else 0
+                signed_speeds_y[keypoint].append(vel_y)
             # For the last frame, append 0
             speeds[keypoint].append(0)
+            signed_speeds_y[keypoint].append(0)
+            
+            # Calculate acceleration as change in speed / time
+            for i in range(len(speeds[keypoint]) - 1):
+                acc = (speeds[keypoint][i+1] - speeds[keypoint][i]) / time_diff if time_diff > 0 else 0
+                accelerations[keypoint].append(acc)
+            accelerations[keypoint].append(0)  # last
     
-    return speeds
+    # Smooth speeds
+    for key in speeds:
+        speeds[key] = smooth_data(np.array(speeds[key]), sigma=2).tolist()
+        signed_speeds_y[key] = smooth_data(np.array(signed_speeds_y[key]), sigma=2).tolist()
+    
+    return speeds, accelerations, signed_speeds_y
 
-# Calculate symmetry score (based on distance between left and right body parts)
-def calculate_symmetry(data):
+# Detect rep start, end, and max depth
+def detect_rep_points(displacement):
+    tolerance = 0.01  # Tolerance for "near 0" displacement; adjust based on data scale
+    
+    # Max depth: frame with maximum displacement (deepest point)
+    max_depth_frame = np.argmax(displacement)
+    
+    # Start frame: search backwards from max_depth for the last frame where displacement is near 0
+    start_frame = None
+    for i in range(max_depth_frame - 1, -1, -1):
+        if abs(displacement.iloc[i]) < tolerance:
+            start_frame = i
+            break
+    if start_frame is None:
+        start_frame = 0  # Fallback to start if no near-0 found
+    
+    # End frame: search forwards from max_depth for the first frame where displacement is near 0
+    end_frame = None
+    for i in range(max_depth_frame, len(displacement)):
+        if abs(displacement.iloc[i]) < tolerance:
+            end_frame = i
+            break
+    if end_frame is None:
+        end_frame = len(displacement) - 1  # Fallback to end if no return to 0
+    
+    return start_frame, end_frame, max_depth_frame
+
+# Calculate symmetry score (based on distance between left and right body parts and angle differences)
+def calculate_symmetry(data, angles):
     symmetry_scores = {}
     
     # Loop over each frame
     for i in range(len(data)):
-        # Example: Comparing left and right shoulders
+        # Shoulder position symmetry
         left_shoulder = np.array([data.loc[i, 'left_shoulder_x'], data.loc[i, 'left_shoulder_y'], data.loc[i, 'left_shoulder_z']])
         right_shoulder = np.array([data.loc[i, 'right_shoulder_x'], data.loc[i, 'right_shoulder_y'], data.loc[i, 'right_shoulder_z']])
         
-        symmetry_scores.setdefault('shoulder_symmetry', []).append(np.linalg.norm(left_shoulder - right_shoulder))
+        symmetry_scores.setdefault('shoulder_position_symmetry', []).append(np.linalg.norm(left_shoulder - right_shoulder))
+        
+        # Angle symmetries
+        symmetry_scores.setdefault('elbow_angle_symmetry', []).append(abs(angles['left_elbow'][i] - angles['right_elbow'][i]))
+        symmetry_scores.setdefault('knee_angle_symmetry', []).append(abs(angles['left_knee'][i] - angles['right_knee'][i]))
+        symmetry_scores.setdefault('hip_angle_symmetry', []).append(abs(angles['left_hip'][i] - angles['right_hip'][i]))
+        symmetry_scores.setdefault('ankle_angle_symmetry', []).append(abs(angles['left_ankle'][i] - angles['right_ankle'][i]))
     
     return symmetry_scores
 
 # Visualization of progress (e.g., angles over time)
-def plot_progress(data, angles, speeds, symmetry_scores):
+def plot_progress(data, angles, speeds, symmetry_scores, accelerations, angular_speeds, signed_speeds_y, start_frame, end_frame, max_depth_frame):
+    if not HAS_MATPLOTLIB:
+        return
     fig, ax = plt.subplots(2, 2, figsize=(15, 10))
 
     # Plot joint angles over time
     for angle_name in angles:
         ax[0,0].plot(data['timestamp_ms'], angles[angle_name], label=angle_name.replace('_', ' ').title())
+    ax[0,0].axvline(data.loc[start_frame, 'timestamp_ms'], color='green', linestyle='--', label='Rep Start')
+    ax[0,0].axvline(data.loc[end_frame, 'timestamp_ms'], color='red', linestyle='--', label='Rep End')
+    ax[0,0].axvline(data.loc[max_depth_frame, 'timestamp_ms'], color='blue', linestyle='--', label='Max Depth')
     ax[0,0].set_title("Joint Angles Over Time")
     ax[0,0].set_xlabel("Time (ms)")
     ax[0,0].set_ylabel("Angle (degrees)")
     ax[0,0].legend()
 
-    # Plot speeds over time for key keypoints
-    key_speeds = ['left_wrist', 'right_wrist', 'left_ankle', 'right_ankle']
-    for key in key_speeds:
-        if key in speeds:
-            ax[0,1].plot(data['timestamp_ms'], speeds[key], label=key.replace('_', ' ').title())
-    ax[0,1].set_title("Speeds Over Time")
+    # Plot signed y-speeds over time for elbows
+    if 'left_elbow' in signed_speeds_y:
+        ax[0,1].plot(data['timestamp_ms'], signed_speeds_y['left_elbow'], label='Left Elbow Signed Y Speed')
+    ax[0,1].axvline(data.loc[start_frame, 'timestamp_ms'], color='green', linestyle='--')
+    ax[0,1].axvline(data.loc[end_frame, 'timestamp_ms'], color='red', linestyle='--')
+    ax[0,1].axvline(data.loc[max_depth_frame, 'timestamp_ms'], color='blue', linestyle='--')
+    ax[0,1].set_title("Signed Y-Velocity Over Time")
     ax[0,1].set_xlabel("Time (ms)")
-    ax[0,1].set_ylabel("Speed (units/s)")
+    ax[0,1].set_ylabel("Velocity (units/s)")
     ax[0,1].legend()
 
-    # Plot symmetry score over time
-    ax[1,0].plot(data['timestamp_ms'], symmetry_scores['shoulder_symmetry'], label='Shoulder Symmetry')
-    ax[1,0].set_title("Symmetry Over Time")
+    # Plot accelerations over time for key keypoints
+    key_acc = ['left_hip', 'right_hip', 'left_knee', 'right_knee']
+    for key in key_acc:
+        if key in accelerations:
+            ax[1,0].plot(data['timestamp_ms'], accelerations[key], label=key.replace('_', ' ').title() + ' Acc')
+    ax[1,0].axvline(data.loc[start_frame, 'timestamp_ms'], color='green', linestyle='--')
+    ax[1,0].axvline(data.loc[end_frame, 'timestamp_ms'], color='red', linestyle='--')
+    ax[1,0].axvline(data.loc[max_depth_frame, 'timestamp_ms'], color='blue', linestyle='--')
+    ax[1,0].set_title("Accelerations Over Time")
     ax[1,0].set_xlabel("Time (ms)")
-    ax[1,0].set_ylabel("Symmetry Distance (units)")
+    ax[1,0].set_ylabel("Acceleration (units/s²)")
     ax[1,0].legend()
 
-    # Plot average confidence over time
-    vis_columns = [col for col in data.columns if 'vis' in col]
-    if vis_columns:
-        avg_confidence = data[vis_columns].mean(axis=1)
-        ax[1,1].plot(data['timestamp_ms'], avg_confidence, label='Average Confidence')
-        ax[1,1].set_title("Average Keypoint Confidence Over Time")
-        ax[1,1].set_xlabel("Time (ms)")
-        ax[1,1].set_ylabel("Confidence")
-        ax[1,1].legend()
+    # Plot symmetry scores over time
+    for sym_name in symmetry_scores:
+        ax[1,1].plot(data['timestamp_ms'], symmetry_scores[sym_name], label=sym_name.replace('_', ' ').title())
+    ax[1,1].axvline(data.loc[start_frame, 'timestamp_ms'], color='green', linestyle='--')
+    ax[1,1].axvline(data.loc[end_frame, 'timestamp_ms'], color='red', linestyle='--')
+    ax[1,1].axvline(data.loc[max_depth_frame, 'timestamp_ms'], color='blue', linestyle='--')
+    ax[1,1].set_title("Symmetry Over Time")
+    ax[1,1].set_xlabel("Time (ms)")
+    ax[1,1].set_ylabel("Symmetry (units or degrees)")
+    ax[1,1].legend()
 
     plt.tight_layout()
     plt.show()
@@ -186,19 +257,38 @@ def analyze(data):
     # Extract joint angles
     angles = extract_joint_angles(data)
     
-    # Calculate speed
-    speeds = calculate_speed(data)
+    # Calculate angular speeds
+    angular_speeds = {}
+    for angle_name in angles:
+        angular_speeds[angle_name] = []
+        for i in range(len(angles[angle_name]) - 1):
+            time_diff = (data.loc[i+1, 'timestamp_ms'] - data.loc[i, 'timestamp_ms']) / 1000
+            ang_speed = (angles[angle_name][i+1] - angles[angle_name][i]) / time_diff if time_diff > 0 else 0
+            angular_speeds[angle_name].append(ang_speed)
+        angular_speeds[angle_name].append(0)
+    
+    # Calculate speed and acceleration
+    speeds, accelerations, signed_speeds_y = calculate_speed(data)
     
     # Calculate symmetry
-    symmetry_scores = calculate_symmetry(data)
+    symmetry_scores = calculate_symmetry(data, angles)
     
-    # Plot the progress (angles, speed, symmetry)
-    plot_progress(data, angles, speeds, symmetry_scores)
+    # Calculate displacement for rep detection
+    left_elbow_y = data['left_elbow_y']
+    right_elbow_y = data['right_elbow_y']
+    elbow_y = (left_elbow_y + right_elbow_y) / 2
+    displacement = elbow_y - elbow_y.iloc[0]
     
-    return angles, speeds, symmetry_scores
+    # Detect rep points
+    start_frame, end_frame, max_depth_frame = detect_rep_points(displacement)
+    
+    # Plot the progress (angles, speed, symmetry, accelerations)
+    plot_progress(data, angles, speeds, symmetry_scores, accelerations, angular_speeds, signed_speeds_y, start_frame, end_frame, max_depth_frame)
+    
+    return angles, speeds, accelerations, symmetry_scores, angular_speeds, signed_speeds_y, start_frame, end_frame, max_depth_frame
 
 # Run the analysis on the data
-angles, speeds, symmetry_scores = analyze(data)
+angles, speeds, accelerations, symmetry_scores, angular_speeds, signed_speeds_y, start_frame, end_frame, max_depth_frame = analyze(data)
 
 # Save results to CSV
 results = pd.DataFrame({
@@ -206,6 +296,12 @@ results = pd.DataFrame({
     'timestamp_ms': data['timestamp_ms'],
     **angles,
     **{f'{k}_speed': v for k, v in speeds.items()},
-    **symmetry_scores
+    **{f'{k}_acceleration': v for k, v in accelerations.items()},
+    **{f'{k}_angular_speed': v for k, v in angular_speeds.items()},
+    **{f'{k}_signed_speed_y': v for k, v in signed_speeds_y.items()},
+    **symmetry_scores,
+    'rep_start_frame': start_frame,
+    'rep_end_frame': end_frame,
+    'max_depth_frame': max_depth_frame
 })
 results.to_csv('pose_outputs/rep_advanced_metrics.csv', index=False)

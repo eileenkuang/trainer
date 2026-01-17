@@ -27,7 +27,7 @@ LANDMARK_NAMES = [
 ]
 
 # Smoothing window size
-SMOOTHING_WINDOW_SIZE = 10
+SMOOTHING_WINDOW_SIZE = 25
 
 # Smoothing function: Simple moving average
 def smooth_landmarks(landmarks_history):
