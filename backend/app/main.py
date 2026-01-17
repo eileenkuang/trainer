@@ -1,35 +1,41 @@
 from fastapi import FastAPI, UploadFile, File
-import os
-from backend.app.video_processing.video_handler import extract_frames
-from backend.app.utils.pose_extractor import load_yolov8_pose_model, extract_pose_yolov8
-from loguru import logger
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 
 app = FastAPI()
 
 # Mount static folder
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
-# Initialize YOLOv8 model once at the start
-model = load_yolov8_pose_model()
+# Upload folder - relative to this file's directory
+UPLOAD_FOLDER = Path(__file__).parent / "uploads"
+UPLOAD_FOLDER.mkdir(exist_ok=True)
 
-@app.post("/process_video/")
-async def process_video(file: UploadFile = File(...)):
-    # Save the uploaded video file
-    video_path = os.path.join("/tmp", file.filename)
-    with open(video_path, "wb") as buffer:
-        buffer.write(await file.read())
+@app.get("/api/ping")
+def ping():
+    return {"message": "backend is alive"}
 
-    # Step 1: Extract frames from the video
-    frames = extract_frames(video_path)
-    
-    logger.info(f"Starting pose extraction for {len(frames)} frames.")
-
-    # Step 2: Extract pose keypoints from each frame
-    all_keypoints = []
-    for idx, frame in enumerate(frames):
-        keypoints = extract_pose_yolov8(frame, model)
-        logger.info(f"Frame {idx + 1}: {len(keypoints)} keypoints detected")
-        all_keypoints.append(keypoints)
-    
-    # Return keypoints data (just for testing purposes)
-    return {"frame_count": len(frames), "keypoints_per_frame": all_keypoints}
+@app.post("/api/save-video")
+async def save_video(file: UploadFile = File(...)):
+    try:
+        # Generate unique filename if file already exists
+        file_location = UPLOAD_FOLDER / file.filename
+        counter = 1
+        original_name = file_location.stem
+        extension = file_location.suffix
+        while file_location.exists():
+            file_location = UPLOAD_FOLDER / f"{original_name}_{counter}{extension}"
+            counter += 1
+        
+        # Save the file
+        with open(file_location, "wb") as f:
+            content = await file.read()
+            f.write(content)
+        
+        return {
+            "status": "saved",
+            "filename": file_location.name,
+            "path": str(file_location)
+        }
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
