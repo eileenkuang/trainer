@@ -1,0 +1,23 @@
+{
+  "body_part_breakdown": {
+    "arms_analysis": "Initial sessions showed issues with 'Elbow Flare', but significant improvement was observed, leading to 'Elbow Tuck' being a strength in later sessions. Wrist position remained stable throughout. The user has progressed to the point where weighted pushups are recommended, indicating strong arm stability and strength.",
+    "legs_analysis": "While not directly cited with specific faults for legs, consistent 'Perfect Depth' and 'Consistent Depth' across sessions imply good lower body engagement and stability, contributing positively to overall exercise form. No issues regarding leg drive or stance were identified.",
+    "core_analysis": "Started with significant challenges, including 'Severe Hip Sag' and 'Core Instability' in earlier sessions. Through focused remedial work, the user developed a 'Neutral Spine' and 'Core Stability', culminating in a 'Stable Core' in the best session. This demonstrates remarkable progress in midline stability and bracing."
+  },
+  "recommended_plan": [
+    {
+      "exercise_name": "Weighted Pushups",
+      "reasoning": "High Frequency / Mastery Progression",
+      "expected_benefit": "Increase overall strength and progressive overload, building upon mastered form."
+    },
+    {
+      "exercise_name": "Tempo Pushups (3-1-1)",
+      "reasoning": "Fixes Weakness (Rushed Tempo)",
+      "expected_benefit": "Improve muscle control, time under tension, and address the occasional tendency to rush the eccentric phase."
+    }
+  ],
+  "current_streak_days": 3,
+  "total_exercises_completed": 5,
+  "best_workout_id": "f772cee7-9252-46d2-916b-cc07478b69d6",
+  "best_workout_reason": "This session achieved the highest form score of 92 and was described as a 'Near perfect session'. The user demonstrated 'Perfect Depth', a 'Stable Core', and 'Controlled Tempo', indicating mastery of the exercise form without any primary faults. This session highlights significant progress and readiness for increased load."
+}

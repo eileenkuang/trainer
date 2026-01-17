@@ -1,73 +1,37 @@
-import json
-import os
+import json 
+import os 
 from dotenv import load_dotenv
+from src.meta_engine import generate_weekly_report 
+from src.db_connector import fetch_user_history 
 
-# --- CRITICAL FIX: Load Environment BEFORE importing src.meta_engine ---
 load_dotenv() 
 
-from src.meta_engine import generate_weekly_report
+def main (): 
+    TARGET_USER_ID = "76f963f6-4a5b-4248-bbe2-69122852a87b"
+    print(f"--- STARTING AI ANALYSIS FOR USER: {TARGET_USER_ID} ---")
 
-def get_mock_database_history():
-    """
-    Simulates fetching sessions from the database.
-    """
-    return [
-        {
-            "session_id": "session_001",
-            "created_at": "2024-01-15T10:00:00",
-            "form_score": 65,
-            "primary_fault": "Hip Sag",
-            # We add a mock 'analysis' block so the AI has something to read
-            "analysis": {
-                "strengths": ["Chest Depth"],
-                "weaknesses": ["Hip Sag", "Core instability"]
-            }
-        },
-        {
-            "session_id": "session_002",
-            "created_at": "2024-01-16T10:00:00",
-            "form_score": 82,
-            "primary_fault": "Minor Elbow Flare",
-            "analysis": {
-                "strengths": ["Core Stability", "Tempo"],
-                "weaknesses": ["Minor Elbow Flare"]
-            }
-        }
-    ]
+    history_data = fetch_user_history(TARGET_USER_ID)
 
-def main():
-    # 1. Load Data
-    print("Fetching user history from database...")
-    history_data = get_mock_database_history()
+    if not history_data: 
+        print("Stoping analysis due to missing data") 
+        return 
+    
+    report = generate_weekly_report(history_data) 
 
-    # 2. Run Meta-Analysis
-    report = generate_weekly_report(history_data)
-
-    # 3. Print The Dashboard
+    # 4. Output the Results
     print("\n" + "="*60)
-    print(f"📊 WEEKLY PROGRESS REPORT")
+    print(f"📊 LIVE DASHBOARD REPORT")
     print("="*60)
     
-    print(f"🔥 Current Streak: {report.current_streak_days} Days")
-    print(f"🏋️ Total Workouts: {report.total_exercises_completed}")
+    print(f"🔥 Streak: {report.current_streak_days} Days")
     print(f"🏆 Best Workout: {report.best_workout_id}")
-    print(f"   Reason: {report.best_workout_reason}\n")
-    
-    print("--- BODY PART BREAKDOWN ---")
-    print(f"💪 ARMS: {report.body_part_breakdown.arms_analysis}")
-    print(f"🦵 LEGS: {report.body_part_breakdown.legs_analysis}")
-    print(f"🧩 CORE: {report.body_part_breakdown.core_analysis}\n")
-    
-    print("--- FUTURE PLAN (AI RECOMMENDATIONS) ---")
-    for rec in report.recommended_plan:
-        print(f"📌 {rec.exercise_name}")
-        print(f"   Why: {rec.reasoning}")
-        print(f"   Benefit: {rec.expected_benefit}\n")
+    print(f"📝 AI Summary: {report.body_part_breakdown.core_analysis}")
 
-    # 4. Save to JSON for Frontend
-    with open("data/weekly_dashboard.json", "w") as f:
+    # 5. Save for Frontend
+    output_path = "data/weekly_dashboard.json"
+    with open(output_path, "w") as f:
         f.write(report.model_dump_json(indent=2))
-    print("Dashboard JSON saved to data/weekly_dashboard.json")
+    print(f"\n✅ Dashboard JSON updated at: {output_path}")
 
 if __name__ == "__main__":
     main()

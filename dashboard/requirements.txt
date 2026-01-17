@@ -7,3 +7,5 @@ google-genai
 opencv-python
 numpy
 supabase
+uvicorn 
+fastapi
