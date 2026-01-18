@@ -9,7 +9,8 @@
       "deviation_score": 1.0,
       "primary_metric": "Left Knee Angle",
       "metric_value": "145° vs 162°",
-      "description": "Significant deviation detected. The left knee angle was 145.35 degrees, which was less than the expected 162.12 degrees, deviating by 16.76 degrees."
+      "description": "Left knee angle collapsed to 145° instead of maintaining 162°.",
+      "correction_cue": "Prevent hip sagging"
     }
   ]
 }

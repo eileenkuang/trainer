@@ -8,6 +8,7 @@ warnings.filterwarnings('ignore')
 # Set up paths
 from video_processing.analysis import process_signals, warp_signals_to_duration, SIGNAL_TOLERANCES, JOINT_WEIGHT, SYMMETRY_WEIGHT, JOINT_SIGNALS, SYMMETRY_SIGNALS, read_body_metrics_from_csv, normalize_signals
 from video_processing.video_handler import process_video
+from full_pipeline import main as run_full_pipeline
 
 def get_signal_type(signal_name):
     if 'symmetry' in signal_name: return 'symmetry'
@@ -194,6 +195,10 @@ def main():
     comparison_df = pd.DataFrame(comparison_rows)
     comparison_df.to_csv('./pose_outputs/user_comparison.csv', index=False)
     print(f"✓ user_comparison.csv ({len(comparison_df)} rows)")
+
+    if not run_full_pipeline(USER_VIDEO): 
+        return False 
+    return True 
 
 if __name__ == "__main__":
     main()

@@ -1,8 +1,8 @@
 import json 
 import os 
 from dotenv import load_dotenv
-from src.meta_engine import generate_weekly_report 
-from src.db_connector import fetch_user_history 
+from .src.meta_engine import generate_weekly_report 
+from .src.db_connector import fetch_user_history 
 
 load_dotenv() 
 
@@ -13,7 +13,7 @@ def main ():
     history_data = fetch_user_history(TARGET_USER_ID)
 
     if not history_data: 
-        print("Stoping analysis due to missing data") 
+        print("Stopping analysis due to missing data") 
         return False
     
     report = generate_weekly_report(history_data) 
@@ -28,7 +28,9 @@ def main ():
     print(f" AI Summary: {report.body_part_breakdown.core_analysis}")
 
     # 5. Save for Frontend
-    output_path = "data/weekly_dashboard.json"
+    dir_path = os.path.dirname(os.path.abspath(__file__))
+    dashboard_path  = os.path.join(dir_path, "data", "weekly_dashboard.json")
+    output_path = dashboard_path
     with open(output_path, "w") as f:
         f.write(report.model_dump_json(indent=2))
     print(f"\n Dashboard JSON updated at: {output_path}")

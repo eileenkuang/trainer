@@ -10,18 +10,27 @@ from .schemas import WeeklyReport
 load_dotenv() 
 
 # 2. Check for Key
-api_key = os.getenv("GEMINI_API_KEY")
-if not api_key:
-    raise ValueError("GEMINI_API_KEY is missing. Check .env file.")
+# api_key = os.getenv("GEMINI_API_KEY")
+# if not api_key:
+#     raise ValueError("GEMINI_API_KEY is missing. Check .env file.")
 
-# 3. Setup Client
+# # 3. Setup Client
+# client = instructor.from_openai(
+#     OpenAI(
+#         base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+#         api_key=api_key
+#     ),
+#     mode=instructor.Mode.JSON
+# )
+
 client = instructor.from_openai(
     OpenAI(
-        base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
-        api_key=api_key
+        base_url="https://openrouter.ai/api/v1",
+        api_key=os.getenv("DEEPSEEK_API_KEY")
     ),
     mode=instructor.Mode.JSON
 )
+ai_model = "deepseek/deepseek-r1-0528:free"
 
 def calculate_streak(dates: List[str]) -> int:
     """Helper to calculate consecutive days active."""
@@ -61,7 +70,6 @@ def generate_weekly_report(past_sessions: List[dict]) -> WeeklyReport:
         best_id = "N/A"
         best_score = 0
     else:
-        # CRITICAL FIX: Look for 'form_score' at the top level, matching your mock data
         best_session = max(past_sessions, key=lambda x: x.get('form_score', 0))
         best_id = best_session.get('session_id', 'Unknown')
         best_score = best_session.get('form_score', 0)
@@ -80,7 +88,7 @@ def generate_weekly_report(past_sessions: List[dict]) -> WeeklyReport:
     """
 
     response = client.chat.completions.create(
-        model="gemini-2.5-flash",
+        model=ai_model, 
         response_model=WeeklyReport,
         messages=[
             {

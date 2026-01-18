@@ -1,0 +1,16 @@
+{
+  "video_id": "user_test_session_01",
+  "fps": 30,
+  "comparison_metrics": [
+    {
+      "timestamp_start": 3.73,
+      "timestamp_end": 5.1,
+      "rep_id": 0,
+      "deviation_score": 1.0,
+      "primary_metric": "Knee Angle",
+      "metric_value": "145° vs 162°",
+      "description": "Left knee angle was 145° instead of maintaining 162°.",
+      "correction_cue": "Prevent hip sagging"
+    }
+  ]
+}

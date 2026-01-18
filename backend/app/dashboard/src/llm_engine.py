@@ -1,78 +1,53 @@
-import os
+import os 
 from dotenv import load_dotenv
-from openai import OpenAI
-import instructor
-from pydantic import BaseModel, Field
-from typing import List
+import instructor 
+from openai import OpenAI 
+from .schemas import AnalysisResult 
 
 load_dotenv()
 
-# 1. SETUP CLIENT
-if not os.getenv("GEMINI_API_KEY"):
-    raise ValueError("GEMINI_API_KEY is missing from .env file")
+# Initialize the client with Instructor patches
+
 
 client = instructor.from_openai(
     OpenAI(
-        base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
-        api_key=os.getenv("GEMINI_API_KEY")
+        base_url="https://openrouter.ai/api/v1",
+        api_key=os.getenv("DEEPSEEK_API_KEY")
     ),
     mode=instructor.Mode.JSON
 )
+ai_key = "deepseek/deepseek-r1-0528:free"
 
-# 2. DATA SCHEMAS
-class RepetitionAnalysis(BaseModel):
-    timestamp_start: float
-    timestamp_end: float
-    rep_id: int
-    deviation_score: float
-    primary_metric: str = Field(..., description="Clean name of the issue e.g. 'Knee Stability'")
-    metric_value: str = Field(..., description="Specific numbers e.g. '145 deg' or 'N/A'")
-    description: str = Field(..., description="A 1-sentence critique.")
-
-class VideoAnalysis(BaseModel):
-    video_id: str
-    fps: int = 30
-    comparison_metrics: List[RepetitionAnalysis]
-
-# 3. GENERATION LOGIC
-def generate_rep_analysis_json(rep_summaries: list) -> VideoAnalysis:
-    
-    # --- FIXED PROMPT TO MATCH YOUR DEBUG DATA ---
-    prompt = f"""
-    You are an expert Biomechanics AI Coach.
-    I will provide raw data from a user's workout.
-    
-    INPUT DATA KEYS:
-    - "primary_metric_raw": The body part involved.
-    - "metric_value_raw" or "all_errors": The technical details.
-
-    YOUR GOAL:
-    Convert the raw data into a clean JSON timeline.
-
-    RULES:
-    1. **Description:** - If `deviation_score` is 1.0 (like in the input), be constructive but firm: "Significant deviation detected."
-       - Use the `all_errors` list to describe *what* happened (e.g. "Knee angle was 145 degrees, expected 162").
-    
-    2. **Metric Extraction:**
-       - Use the numbers from `metric_value_raw` or `all_errors`. 
-       - Example: "145.35 < GT 162.12" -> metric_value: "145° vs 162°"
-
-    INPUT DATA:
-    {rep_summaries}
+def generate_analysis_script(metrics_json: str, cue_bank_text: str) -> AnalysisResult: 
+    """
+    Converts raw metrics to structured Analysis output for the website to use.
     """
 
-    print("   ... 🧠 Gemini is analyzing rep data...")
+    response = client.chat.completions.create( 
+        model=ai_key, 
+        response_model=AnalysisResult, 
+        messages=[
+            {
+                "role": "system", 
+                "content": (
+                    "You are an expert biomechanics and fitness coach. " 
+                    "1. Analyze the input metrics and timestamps. " 
+                    "2. Determine the user's skill level (Beginner=High deviation, Advanced=Low deviation). "
+                    "3. Create a timeline of feedback events. " 
+                    "4. For each event, write a SHORT text for the video overlay and DETAILED text for the website."
+                    "5. TAILOR THE TONE: Encouraging/Simple for Beginners; Technical/Direct for Advanced."
+                )
+            }, 
+            {
+                "role": "user", 
+                "content": f"""
+                METRICS DATA: 
+                {metrics_json}
 
-    try:
-        response = client.chat.completions.create(
-            model="gemini-2.5-flash", 
-            response_model=VideoAnalysis,
-            messages=[
-                {"role": "user", "content": prompt}
-            ],
-        )
-        return response
-
-    except Exception as e:
-        print(f"❌ LLM Generation Error: {e}")
-        return VideoAnalysis(video_id="error", comparison_metrics=[])
+                GUIDELINES / CUE BANK: 
+                {cue_bank_text}
+                """
+            }
+        ]
+    )
+    return response

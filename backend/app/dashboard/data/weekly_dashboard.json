@@ -1,28 +1,23 @@
 {
   "body_part_breakdown": {
-    "arms_analysis": "Initial struggles with 'Elbow Flare' were successfully corrected through targeted exercises. Recent sessions demonstrate consistent 'Elbow Tuck' and strong arm stability, leading to fault-free performance in high-scoring workouts.",
-    "legs_analysis": "Leg stability was consistently maintained throughout all sessions, with no specific weaknesses or strengths identified for leg drive or stance. The lower body provided a solid foundation.",
-    "core_analysis": "Early sessions revealed significant issues with 'Hip Sag' and 'Core Instability'. These were progressively addressed and overcome, resulting in a 'Stable Core' and 'Neutral Spine' in subsequent sessions, demonstrating excellent midline stability and bracing in the most recent high-performing workouts."
+    "arms_analysis": "Early elbow flare issues evolved into stable positioning, showing significant improvement in arm stability. Recent sessions demonstrate excellent elbow control and strength maintenance throughout full range of motion.",
+    "legs_analysis": "Leg stability showed marked improvement from initial hip sag. While not a primary focus, leg drive effectively supports core bracing now without breakdowns.",
+    "core_analysis": "Core progression is remarkable - evolved from severe instability (hip sag) to perfect midline bracing. Recent sessions consistently highlight core stability as foundational to success."
   },
   "recommended_plan": [
     {
       "exercise_name": "Weighted Pushups",
-      "reasoning": "High Frequency & Mastery",
-      "expected_benefit": "Increase overall strength and continue progressive overload with mastered form."
+      "reasoning": "High Frequency",
+      "expected_benefit": "Building on recent progression history to increase load capacity while maintaining perfected form"
     },
     {
-      "exercise_name": "Tempo Pushups (3-1-1)",
-      "reasoning": "Reinforce Tempo Control (Past Weakness)",
-      "expected_benefit": "Further improve muscular control and time under tension, ensuring no regression in tempo."
-    },
-    {
-      "exercise_name": "Band-Resisted Pushup",
-      "reasoning": "Address Lingering Elbow Flare (Past Weakness)",
-      "expected_benefit": "Maintain proper elbow tuck and shoulder stability, preventing old habits from returning."
+      "exercise_name": "Archer Pushups",
+      "reasoning": "Fixes Weakness",
+      "expected_benefit": "Challenges unilateral arm stability to prevent elbow flare regression while enhancing core anti-rotation"
     }
   ],
   "current_streak_days": 3,
   "total_exercises_completed": 9,
   "best_workout_id": "0b53a3a8-a290-458f-89d5-ff29160145a8",
-  "best_workout_reason": "This session achieved the highest form score of 92 with no primary faults identified. It showcased 'Perfect Depth', 'Stable Core', and 'Controlled Tempo', indicating near-perfect execution and great overall control and alignment."
+  "best_workout_reason": "Achieved peak score (92) through flawless execution: perfect depth maintained throughout each rep combined with rock-solid core stability and textbook tempo control under progression-level load."
 }
