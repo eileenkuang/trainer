@@ -62,7 +62,7 @@ select {
   padding: 0.5rem 1rem;
   border-radius: 9999px;
   border: 1px solid #2d3b3b;
-  background-color: #d4e4d4;
+  background-color: #d4e4e4;
   color: #2d3b3b;
   width: 200px;
   font-size: 1.3rem;
@@ -163,6 +163,11 @@ select {
 
 .video-box {
   flex: 1;
+}
+
+.dashboard .video-box p {
+  color: white !important;
+  font-size: 1.5rem;
 }
 
 .stats p {

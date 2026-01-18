@@ -6,7 +6,7 @@ def get_supabase_client() -> Client:
     url = os.environ.get("SUPABASE_URL")
     key = os.environ.get("SUPABASE_KEY")
     if not url or not key:
-        raise ValueError("❌ Missing Supabase credentials in .env file")
+        raise ValueError("Missing Supabase credentials in .env file")
     return create_client(url, key)
 
 def get_or_create_user(username: str = "demo_user"):

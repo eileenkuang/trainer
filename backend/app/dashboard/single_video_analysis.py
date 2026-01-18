@@ -9,7 +9,7 @@ load_dotenv()
 def main(): 
     # Loading Data 
     print("Loading metrics...") 
-    with open ("data/metrics.json", "r") as f: 
+    with open ("data/final_rep_analysis.json", "r") as f: 
         metrics_data = f.read() 
 
     with open("config/cue_bank.json", "r") as f: 
@@ -46,6 +46,9 @@ def main():
         save_session_to_db(AnalysisResult(**data), video_name="demo_pushup.mp4")
     except Exception as e: 
         print(f" Database Error: {e}")
+        return False
+    
+    return True
 
 if __name__ == "__main__":
     main()

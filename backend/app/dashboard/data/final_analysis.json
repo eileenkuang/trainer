@@ -1,29 +1,72 @@
 {
   "user_skill_level": "Beginner",
-  "general_summary": "Overall, your form shows potential, but there are some critical areas to address for safety and effectiveness. Specifically, focus on maintaining a neutral spine during your push-ups and ensuring your elbows remain tucked to protect your shoulders. One rep demonstrated excellent depth and control, showing you can achieve good form with conscious effort. Keep practicing these adjustments to build a strong foundation.",
-  "timeline_events": [
+  "general_summary": "Overall, you've shown a great start with your form, achieving a perfect repetition with excellent spinal alignment. However, there are a few areas to focus on for consistent improvement, specifically keeping your head neutral, ensuring a full lockout, and controlling your tempo during the eccentric phase. With a little practice on these points, your form will become much more stable and efficient!",
+  "gamification": {
+    "form_score": 58,
+    "xp_earned": 150,
+    "current_level_title": "Form Explorer",
+    "streak_bonus": false
+  },
+  "strengths": [
+    "Consistent spinal alignment in well-executed repetitions",
+    "Good overall form and range of motion when focused"
+  ],
+  "weaknesses": [
+    "Cervical spine control (head dropping forward)",
+    "Incomplete lockout at the top of the movement",
+    "Lack of control during the eccentric (lowering) phase"
+  ],
+  "remedial_plan": [
     {
-      "start_time": 2.0,
-      "end_time": 3.5,
-      "overlay_text": "Keep back straight!",
-      "detailed_explanation": "Your lower back sagged significantly, creating excessive lumbar extension. This puts unnecessary stress on your spine and can lead to discomfort or injury. Focus on keeping your core engaged throughout the movement.",
-      "correction_cue": "Actively brace your core and engage your glutes to keep your hips in line with your shoulders throughout the movement.",
-      "status_color": "red"
+      "name": "Chin Tucks",
+      "target_fault": "Cervical spine flexion",
+      "prescription": "3 sets of 10-15 controlled repetitions",
+      "adaptive_reasoning": "This exercise strengthens the deep neck flexors and improves awareness of a neutral head position, helping you maintain proper cervical alignment during your main lifts."
     },
     {
-      "start_time": 5.0,
-      "end_time": 6.5,
-      "overlay_text": "Excellent form, great depth!",
-      "detailed_explanation": "You achieved excellent depth while maintaining a neutral spine, indicating strong core engagement and good range of motion. This was a well-executed repetition!",
-      "correction_cue": "Continue to focus on controlled movement and maintaining your strong spinal alignment.",
+      "name": "Scapular Push-ups",
+      "target_fault": "Incomplete lockout",
+      "prescription": "3 sets of 10-12 repetitions",
+      "adaptive_reasoning": "Focusing on scapular protraction and retraction helps improve stability and strength at the end range of extension, directly addressing the incomplete lockout issue."
+    },
+    {
+      "name": "Controlled Eccentric Reps",
+      "target_fault": "Rapid eccentric tempo",
+      "prescription": "3 sets of 5-8 repetitions with a 3-second lowering phase",
+      "adaptive_reasoning": "By deliberately slowing down the lowering phase, you build muscle control, strength, and tissue resilience, which is crucial for preventing loss of control and potential injury."
+    }
+  ],
+  "timeline_events": [
+    {
+      "start_time": 1.5,
+      "end_time": 3.0,
+      "overlay_text": "Excellent form!",
+      "detailed_explanation": "Fantastic job on this repetition! Your form was nearly perfect, maintaining a neutral spine throughout the movement and achieving a full range of motion. This is exactly what we're looking for, keep up this great consistency!",
+      "correction_cue": "strength",
       "status_color": "green"
     },
     {
-      "start_time": 8.0,
-      "end_time": 9.5,
-      "overlay_text": "Tuck elbows in!",
-      "detailed_explanation": "Your elbows flared out excessively, reaching 90 degrees from your torso. This position places significant stress on your shoulder joints and can increase your risk of injury. Aim to keep your elbows closer to your body.",
-      "correction_cue": "Actively pull your elbows back and down towards your hips, aiming for a 45-degree angle relative to your torso to protect your shoulders.",
+      "start_time": 4.5,
+      "end_time": 6.0,
+      "overlay_text": "Head neutral!",
+      "detailed_explanation": "During this rep, your head dropped forward quite a bit, causing excessive flexion in your cervical spine. This can put unnecessary strain on your neck. Focus on keeping your head in line with your spine, imagining you're holding a small orange under your chin.",
+      "correction_cue": "weakness",
+      "status_color": "red"
+    },
+    {
+      "start_time": 7.5,
+      "end_time": 9.0,
+      "overlay_text": "Full lockout!",
+      "detailed_explanation": "You're almost there! At the top of this repetition, your elbows weren't fully extended, indicating an incomplete lockout. Aim for a complete, controlled extension without hyperextending. This ensures you're engaging your muscles through their full range.",
+      "correction_cue": "weakness",
+      "status_color": "yellow"
+    },
+    {
+      "start_time": 10.5,
+      "end_time": 12.0,
+      "overlay_text": "Control descent!",
+      "detailed_explanation": "Your descent (eccentric phase) was a bit too quick here, which can lead to a loss of control at the bottom. A slower, more deliberate lowering phase (think 2-3 seconds) is vital for building strength and stability, and preventing injury.",
+      "correction_cue": "weakness",
       "status_color": "red"
     }
   ]

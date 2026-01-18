@@ -20,8 +20,8 @@ class VideoEvent(BaseModel):
     end_time: float
     overlay_text: str = Field(..., max_length=25)
     detailed_explanation: str
-    type: Literal["strength", "weakness"]
-    severity: Literal["low", "medium", "high"]
+    correction_cue: Literal['weakness', 'strength'] # str = Field(..., description="Either 'strength' or 'weakness'")
+    status_color: Literal["green", "red", "yellow"]
 
 # class VideoEvent(BaseModel): 
 #     start_time: float = Field(..., description="Start time of Event")
@@ -38,7 +38,7 @@ class VideoEvent(BaseModel):
 
 class AnalysisResult(BaseModel):
     user_skill_level: Literal["Beginner", "Intermediate", "Advanced"]
-    personalized_summary: str
+    general_summary: str
     gamification: GamificationStats
     strengths: List[str]
     weaknesses: List[str]
