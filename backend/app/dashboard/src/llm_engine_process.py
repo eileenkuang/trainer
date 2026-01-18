@@ -30,6 +30,8 @@ load_dotenv()
 #     ),
 #     mode=instructor.Mode.JSON
 # )
+# ai_model = "gemini-2.5-flash"
+
 ai_model = "deepseek/deepseek-r1-0528:free"
 client = instructor.from_openai(
     OpenAI(

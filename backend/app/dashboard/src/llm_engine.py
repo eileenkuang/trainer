@@ -14,7 +14,19 @@ load_dotenv(dotenv_path=env_path)
 
 # Initialize the client with Instructor patches
 
+# api_key = os.getenv("GEMINI_API_KEY")
+# if not api_key:
+#     raise ValueError("GEMINI_API_KEY is missing. Check .env file.")
 
+# # 3. Setup Client
+# client = instructor.from_openai(
+#     OpenAI(
+#         base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+#         api_key=api_key
+#     ),
+#     mode=instructor.Mode.JSON
+# )
+# ai_key = "gemini-2.5-flash"
 client = instructor.from_openai(
     OpenAI(
         base_url="https://openrouter.ai/api/v1",

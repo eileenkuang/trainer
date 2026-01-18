@@ -1,33 +1,33 @@
 {
   "user_skill_level": "Beginner",
-  "general_summary": "The lift showed significant ankle stability issues. Focus on mastering spinal alignment fundamentals to build a strong foundation and prevent compensations.",
+  "general_summary": "You've made a good start on your session! We noticed some significant instability in your right ankle during the movement. Focusing on improving your ankle stability will build a much stronger and safer foundation for all your exercises.",
   "gamification": {
-    "form_score": 65,
-    "xp_earned": 15,
+    "form_score": 40,
+    "xp_earned": 50,
     "current_level_title": "Stability Rookie",
     "streak_bonus": false
   },
   "strengths": [],
   "weaknesses": [
-    "Ankle Stability"
+    "Right Ankle Instability"
   ],
   "remedial_plan": [
     {
-      "name": "Single-Leg Balance Holds",
+      "name": "Single-Leg Balance",
       "target_fault": "Ankle Instability",
-      "prescription": "3 sets × 30 seconds per leg",
-      "adaptive_reasoning": "Builds proprioception and ankle strength to improve joint control during lifts"
+      "prescription": "Perform 3 sets of 30 seconds per leg. Focus on maintaining a still and balanced position.",
+      "adaptive_reasoning": "This exercise directly targets the small muscles surrounding your ankle, enhancing proprioception and strengthening the stabilizers. This is crucial for developing a solid, stable base for all your movements, addressing the right ankle acceleration issue."
     }
   ],
   "timeline_events": [
     {
       "start_time": 2.93,
       "end_time": 2.97,
-      "overlay_text": "Neutral Spine First!",
-      "detailed_explanation": "Your ankle instability occurs when leaning too far forward. Maintain a neutral spine alignment to distribute weight evenly through both feet and reduce ankle stress.",
+      "overlay_text": "Keep your ankles steady!",
+      "detailed_explanation": "Your right ankle accelerated significantly more than it should, indicating instability. Focus on rooting your feet firmly into the ground to create a solid, stable foundation for your movements.",
       "correction_cue": "weakness",
-      "status_color": "red"
+      "status_color": "yellow"
     }
   ],
-  "annotated_video_filename": "annotated_user_test_session_01.mp4"
+  "annotated_video_filename": "user_test_session_01_annotated.mp4"
 }

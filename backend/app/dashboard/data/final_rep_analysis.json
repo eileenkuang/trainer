@@ -7,10 +7,10 @@
       "timestamp_end": 2.97,
       "rep_id": 0,
       "deviation_score": 1.0,
-      "primary_metric": "Ankle Stability",
+      "primary_metric": "Right Ankle Acceleration",
       "metric_value": "-0.38 vs 0.03",
-      "description": "Right ankle acceleration measured at -0.38, falling significantly below the target of 0.03.",
-      "correction_cue": "Prioritize spinal alignment (neutral spine) over depth."
+      "description": "Right Ankle Acceleration was -0.38, significantly lower than the target of 0.03.",
+      "correction_cue": "Stabilize Ankles"
     }
   ]
 }

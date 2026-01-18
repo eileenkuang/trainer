@@ -22,6 +22,7 @@ load_dotenv()
 #     ),
 #     mode=instructor.Mode.JSON
 # )
+# ai_model = "gemini-2.5-flash"
 
 client = instructor.from_openai(
     OpenAI(
