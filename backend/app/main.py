@@ -101,6 +101,18 @@ async def analyze_video(file: UploadFile = File(...), exercise: str = Form(...))
             "traceback": traceback.format_exc()
         }
 
+@app.get("/api/weekly-dashboard")
+def get_weekly_dashboard():
+    try:
+        weekly_dashboard_path = Path(__file__).parent / "dashboard" / "data" / "weekly_dashboard.json"
+        if weekly_dashboard_path.exists():
+            with open(weekly_dashboard_path, "r") as f:
+                return json.load(f)
+        else:
+            return {"error": "weekly_dashboard.json not found"}
+    except Exception as e:
+        return {"error": str(e)}
+
 # Mount static files for dashboard data (videos, etc.)
 dashboard_data_path = Path(__file__).parent / "dashboard" / "data"
 app.mount("/api/videos", StaticFiles(directory=str(dashboard_data_path)), name="videos")

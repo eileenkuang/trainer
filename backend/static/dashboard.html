@@ -13,11 +13,12 @@
 
 <body class="dashboard-page">
   <div class="dashboard">
-    <h1> <br> </h1>
+    <h1> <br> <br> <br> </h1>
 
     <div class="top-section">
       <div class="stats">
         <a href="index.html"><button>Add Exercise</button></a>
+        <button id="refreshBtn">Refresh</button>
         <div class="stats-row">
           <p>Streak: <span id="streak">7</span></p>
           <p>Total days: <span id="totalDays">30</span></p>
@@ -26,13 +27,13 @@
     </div>
 
     <div class="cards">
-      <button class="card">Keep your back straight during squats</button>
-      <button class="card">Breathe steadily through each rep</button>
-      <button class="card">Maintain proper foot positioning</button>
+      <div class="card" id="armsCard">Keep your back straight during squats</div>
+      <div class="card" id="legsCard">Breathe steadily through each rep</div>
+      <div class="card" id="coreCard">Maintain proper foot positioning</div>
     </div>
 
-    <div class="recommendations">
-      <p>Recommended Exercises:</p>
+    <div class="recommendations" id="recommendationsSection">
+      <h3>Recommended Exercises</h3>
       <ul>
         <li>Squats – 3x12</li>
         <li>Lunges – 3x10</li>
