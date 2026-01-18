@@ -1,72 +1,73 @@
 {
   "user_skill_level": "Beginner",
-  "general_summary": "Great effort in this session! You demonstrated excellent form in your first repetition, showing your potential. We'll focus on improving head position during the movement, achieving full range of motion, and controlling your tempo to make every rep even more effective and safer.",
+  "general_summary": "Overall, you've shown a great start with your form, achieving a perfect repetition with excellent spinal alignment. However, there are a few areas to focus on for consistent improvement, specifically keeping your head neutral, ensuring a full lockout, and controlling your tempo during the eccentric phase. With a little practice on these points, your form will become much more stable and efficient!",
   "gamification": {
     "form_score": 58,
-    "xp_earned": 250,
+    "xp_earned": 150,
     "current_level_title": "Form Explorer",
     "streak_bonus": false
   },
   "strengths": [
-    "Consistent neutral spine alignment in controlled repetitions."
+    "Consistent spinal alignment in well-executed repetitions",
+    "Good overall form and range of motion when focused"
   ],
   "weaknesses": [
-    "Maintaining neutral cervical spine position throughout the movement.",
-    "Achieving full lockout/extension at the top of the movement.",
-    "Controlling eccentric (descent) tempo."
+    "Cervical spine control (head dropping forward)",
+    "Incomplete lockout at the top of the movement",
+    "Lack of control during the eccentric (lowering) phase"
   ],
   "remedial_plan": [
     {
-      "name": "Chin Tucks / Neck Retractions",
-      "target_fault": "Cervical spine flexion (head dropping forward)",
-      "prescription": "3 sets of 10-15 slow, controlled repetitions, holding for 2 seconds.",
-      "adaptive_reasoning": "This exercise directly strengthens the deep neck flexors and improves your awareness of a neutral head position, which is crucial for preventing your head from dropping forward during movements and reducing neck strain."
+      "name": "Chin Tucks",
+      "target_fault": "Cervical spine flexion",
+      "prescription": "3 sets of 10-15 controlled repetitions",
+      "adaptive_reasoning": "This exercise strengthens the deep neck flexors and improves awareness of a neutral head position, helping you maintain proper cervical alignment during your main lifts."
     },
     {
-      "name": "Push-up Plus",
-      "target_fault": "Incomplete lockout / soft elbows",
-      "prescription": "3 sets of 8-12 repetitions, focusing on maximal protraction at the top.",
-      "adaptive_reasoning": "To encourage full extension and stability at the top of your movements, the Push-up Plus builds strength and control around your shoulder blades, supporting a complete and stable lockout without hyperextension."
+      "name": "Scapular Push-ups",
+      "target_fault": "Incomplete lockout",
+      "prescription": "3 sets of 10-12 repetitions",
+      "adaptive_reasoning": "Focusing on scapular protraction and retraction helps improve stability and strength at the end range of extension, directly addressing the incomplete lockout issue."
     },
     {
-      "name": "Tempo Push-ups (3-0-1-0)",
-      "target_fault": "Rapid eccentric (descent) tempo",
-      "prescription": "3 sets of 6-8 repetitions, focusing on a 3-second lowering phase.",
-      "adaptive_reasoning": "To address the rapid descent and loss of control, practicing push-ups with a controlled 3-second eccentric phase will build crucial muscle control, stability, and strength, ensuring better form and preventing injury throughout the entire movement."
+      "name": "Controlled Eccentric Reps",
+      "target_fault": "Rapid eccentric tempo",
+      "prescription": "3 sets of 5-8 repetitions with a 3-second lowering phase",
+      "adaptive_reasoning": "By deliberately slowing down the lowering phase, you build muscle control, strength, and tissue resilience, which is crucial for preventing loss of control and potential injury."
     }
   ],
   "timeline_events": [
     {
       "start_time": 1.5,
       "end_time": 3.0,
-      "overlay_text": "Great form!",
-      "detailed_explanation": "Excellent work maintaining a neutral spine and full range of motion throughout this repetition. This is a strong example of proper form and a great starting point for your training!",
+      "overlay_text": "Excellent form!",
+      "detailed_explanation": "Fantastic job on this repetition! Your form was nearly perfect, maintaining a neutral spine throughout the movement and achieving a full range of motion. This is exactly what we're looking for, keep up this great consistency!",
       "correction_cue": "strength",
       "status_color": "green"
     },
     {
       "start_time": 4.5,
       "end_time": 6.0,
-      "overlay_text": "Keep head neutral!",
-      "detailed_explanation": "During this rep, your head dropped significantly, causing excessive cervical spine flexion. This can put unnecessary strain on your neck. Focus on keeping your gaze slightly forward and your head aligned with your spine to protect your neck.",
+      "overlay_text": "Head neutral!",
+      "detailed_explanation": "During this rep, your head dropped forward quite a bit, causing excessive flexion in your cervical spine. This can put unnecessary strain on your neck. Focus on keeping your head in line with your spine, imagining you're holding a small orange under your chin.",
       "correction_cue": "weakness",
       "status_color": "red"
     },
     {
       "start_time": 7.5,
       "end_time": 9.0,
-      "overlay_text": "Lockout elbows!",
-      "detailed_explanation": "You showed an incomplete lockout at the top of this repetition, keeping your elbows slightly bent. Aim to achieve full extension at the top of the movement to maximize muscle engagement and complete the full range of motion effectively.",
+      "overlay_text": "Full lockout!",
+      "detailed_explanation": "You're almost there! At the top of this repetition, your elbows weren't fully extended, indicating an incomplete lockout. Aim for a complete, controlled extension without hyperextending. This ensures you're engaging your muscles through their full range.",
       "correction_cue": "weakness",
       "status_color": "yellow"
     },
     {
       "start_time": 10.5,
       "end_time": 12.0,
-      "overlay_text": "Control your descent!",
-      "detailed_explanation": "Your descent was too rapid in this rep, leading to a loss of control at the bottom. Focus on a controlled, slower eccentric phase (the lowering portion) to build strength, maintain stability, and improve overall muscle activation throughout the movement.",
+      "overlay_text": "Control descent!",
+      "detailed_explanation": "Your descent (eccentric phase) was a bit too quick here, which can lead to a loss of control at the bottom. A slower, more deliberate lowering phase (think 2-3 seconds) is vital for building strength and stability, and preventing injury.",
       "correction_cue": "weakness",
-      "status_color": "yellow"
+      "status_color": "red"
     }
   ]
 }
