@@ -71,6 +71,8 @@ analyzeBtn.addEventListener("click", async () => {
     });
 
     const data = await res.json();
+    console.log("Analyze response:", data);
+    
     // Display the general_summary from final_analysis.json
     if (data.general_summary) {
       output.textContent = data.general_summary;
@@ -80,9 +82,35 @@ analyzeBtn.addEventListener("click", async () => {
     
     // Replace video with annotated_output.mp4 if available
     if (data.annotated_video_url) {
-      videoContainer.innerHTML = `<video src="${data.annotated_video_url}" controls></video>`;
+      console.log("Loading annotated video:", data.annotated_video_url);
+      const video = document.createElement("video");
+      video.src = data.annotated_video_url;
+      video.controls = true;
+      video.style.width = "100%";
+      video.style.height = "100%";
+      video.style.display = "block";
+      video.style.objectFit = "contain";
+      video.style.backgroundColor = "#000";
+      
+      // Add event listeners for debugging
+      video.addEventListener("loadstart", () => console.log("Video: loadstart"));
+      video.addEventListener("loadedmetadata", () => console.log("Video: loadedmetadata, duration:", video.duration));
+      video.addEventListener("canplay", () => console.log("Video: canplay"));
+      video.addEventListener("play", () => console.log("Video: play"));
+      video.addEventListener("error", (e) => console.error("Video error:", e.target.error));
+      
+      videoContainer.innerHTML = "";
+      videoContainer.appendChild(video);
+      console.log("Video element created and appended, container dims:", videoContainer.offsetWidth, "x", videoContainer.offsetHeight);
+      
+      // Force load
+      video.load();
+      console.log("Video load() called");
+    } else {
+      console.warn("No annotated video URL in response");
     }
   } catch (err) {
     output.textContent = "Error analyzing video: " + err;
+    console.error("Error during analysis:", err);
   }
 });

@@ -1,32 +1,35 @@
 {
   "user_skill_level": "Beginner",
-  "general_summary": "You've made a good start on your session! We noticed some significant instability in your right ankle during the movement. Focusing on improving your ankle stability will build a much stronger and safer foundation for all your exercises.",
+  "general_summary": "Good effort overall, but instability due to excessive ankle acceleration indicates compromised spinal alignment. Focus on control and maintaining neutral alignment for safety.",
   "gamification": {
-    "form_score": 40,
+    "form_score": 35,
     "xp_earned": 50,
     "current_level_title": "Stability Rookie",
     "streak_bonus": false
   },
-  "strengths": [],
+  "strengths": [
+    "Consistent effort throughout session"
+  ],
   "weaknesses": [
-    "Right Ankle Instability"
+    "Excessive ankle acceleration",
+    "Spinal alignment breakdown"
   ],
   "remedial_plan": [
     {
-      "name": "Single-Leg Balance",
-      "target_fault": "Ankle Instability",
-      "prescription": "Perform 3 sets of 30 seconds per leg. Focus on maintaining a still and balanced position.",
-      "adaptive_reasoning": "This exercise directly targets the small muscles surrounding your ankle, enhancing proprioception and strengthening the stabilizers. This is crucial for developing a solid, stable base for all your movements, addressing the right ankle acceleration issue."
+      "name": "Wall Sits with Spinal Alignment Focus",
+      "target_fault": "Excessive ankle acceleration causing spinal compromise",
+      "prescription": "3 sets × 20 seconds",
+      "adaptive_reasoning": "Builds lower body stability while reinforcing neutral spine position - critical for beginners learning to prioritize alignment over depth."
     }
   ],
   "timeline_events": [
     {
-      "start_time": 2.93,
-      "end_time": 2.97,
-      "overlay_text": "Keep your ankles steady!",
-      "detailed_explanation": "Your right ankle accelerated significantly more than it should, indicating instability. Focus on rooting your feet firmly into the ground to create a solid, stable foundation for your movements.",
+      "start_time": 5.17,
+      "end_time": 7.83,
+      "overlay_text": "Keep spine neutral!",
+      "detailed_explanation": "Ankle acceleration reached 0.54 m/s² (19281% over target) indicates instability that compromises spinal safety. Reduce movement speed to maintain control.",
       "correction_cue": "weakness",
-      "status_color": "yellow"
+      "status_color": "red"
     }
   ],
   "annotated_video_filename": "user_test_session_01_annotated.mp4"

@@ -75,7 +75,8 @@ def render_video(video_path, json_path, output_path):
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
     # 4. Setup Video Writer
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    # Use avc1 (H.264) codec for better browser compatibility
+    fourcc = cv2.VideoWriter_fourcc(*'avc1')
     out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
     frame_idx = 0

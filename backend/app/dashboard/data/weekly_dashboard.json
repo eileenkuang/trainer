@@ -1,23 +1,28 @@
 {
   "body_part_breakdown": {
-    "arms_analysis": "Arms showed significant improvement this week, moving from issues like 'Elbow Flare' and 'Rushed Tempo' in earlier sessions to demonstrating 'Controlled Tempo' and proper 'Elbow Tuck' in higher-scoring workouts. This indicates good progress in upper body strength and movement control.",
-    "legs_analysis": "Legs, specifically ankle stability, have become a recent area of concern. The latest sessions highlight 'Right Ankle Instability' and general 'Ankle Stability' issues, which negatively impacted overall form despite improvements elsewhere. This suggests a need for focused remedial work to build a stable foundation.",
-    "core_analysis": "Core stability has shown excellent progression. Initially, 'Hip Sag' and 'Core Instability' were primary faults in lower-scoring sessions. Through consistent effort, the core has become a 'Stable Core' and a consistent strength in your highest-scoring workouts, demonstrating effective bracing and midline control."
+    "arms_analysis": "User demonstrates advanced elbow control in pushups with mastery at angles below 45°, but exhibits instability during lower-body movements. Recent squat sessions show compensatory arm movements during balance challenges.",
+    "legs_analysis": "Significant instability patterns observed in ankles/knees across multiple sessions. Asymmetric acceleration creates joint shear forces. Hip drive imbalance persists during squat descent despite glute activation cues.",
+    "core_analysis": "Core bracing improves during upper-body work but collapses under lower-body load. Spinal alignment failure occurs specifically when lower extremity instability creates compensatory leaning."
   },
   "recommended_plan": [
     {
-      "exercise_name": "Single-Leg Balance Holds",
-      "reasoning": "Fixes Weakness",
-      "expected_benefit": "Addresses the recent and recurring 'Ankle Instability' to build a stronger and more stable base for all movements."
-    },
-    {
       "exercise_name": "Weighted Pushups",
       "reasoning": "High Frequency",
-      "expected_benefit": "Capitalizes on mastered form and controlled tempo to increase strength and progressive overload, building upon consistent high-performance sessions."
+      "expected_benefit": "Maintains upper-body strength progression while reinforcing established good arm mechanics, preventing skill regression during lower-body focus"
+    },
+    {
+      "exercise_name": "Band-Resisted Squats",
+      "reasoning": "Fixes Weakness",
+      "expected_benefit": "External resistance trains knee-out control while dynamically loading glutes, reducing shear forces from asymmetric acceleration"
+    },
+    {
+      "exercise_name": "Single-Leg Balance to Hip Hinge",
+      "reasoning": "Fixes Weakness",
+      "expected_benefit": "Integrates ankle proprioception training with posterior chain activation - addressing foundational instability while reinforcing hip positioning"
     }
   ],
   "current_streak_days": 4,
-  "total_exercises_completed": 11,
+  "total_exercises_completed": 14,
   "best_workout_id": "0b53a3a8-a290-458f-89d5-ff29160145a8",
-  "best_workout_reason": "This session achieved a near-perfect score of 92, demonstrating 'Perfect Depth', a 'Stable Core', and 'Controlled Tempo'. It showed great overall control and alignment, indicating mastery of the movement's fundamentals and readiness for increased challenge."
+  "best_workout_reason": "Achieved near-perfect execution with simultaneous demonstration of depth control, midline stability and tempo mastery - representing technical integration of previously isolated strengths"
 }

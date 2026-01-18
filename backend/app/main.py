@@ -1,5 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pathlib import Path
 import os
 import sys
@@ -82,7 +83,7 @@ async def analyze_video(file: UploadFile = File(...), exercise: str = Form(...))
         annotated_video_path = Path(__file__).parent / "dashboard" / "data" / "annotated_output.mp4"
         annotated_video_url = ""
         if annotated_video_path.exists():
-            annotated_video_url = "/api/videos/annotated_output.mp4"
+            annotated_video_url = "/api/annotated-video"
         
         return {
             "status": "success",
@@ -113,8 +114,23 @@ def get_weekly_dashboard():
     except Exception as e:
         return {"error": str(e)}
 
-# Mount static files for dashboard data (videos, etc.)
-dashboard_data_path = Path(__file__).parent / "dashboard" / "data"
-app.mount("/api/videos", StaticFiles(directory=str(dashboard_data_path)), name="videos")
+@app.get("/api/annotated-video")
+def get_annotated_video():
+    """Serve the annotated video file with proper streaming support"""
+    try:
+        annotated_video_path = Path(__file__).parent / "dashboard" / "data" / "annotated_output.mp4"
+        if not annotated_video_path.exists():
+            return {"error": "annotated_output.mp4 not found"}
+        
+        return FileResponse(
+            path=str(annotated_video_path),
+            media_type="video/mp4",
+            filename="annotated_output.mp4"
+        )
+    except Exception as e:
+        return {"error": str(e)}
+
+# Mount static files for dashboard data (except videos - those are served by dedicated endpoint)
+# Removed StaticFiles mount for /api/videos to avoid conflicts
 
 app.mount("/", StaticFiles(directory="static", html=True), name="static")

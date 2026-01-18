@@ -3,14 +3,14 @@
   "fps": 30,
   "comparison_metrics": [
     {
-      "timestamp_start": 2.93,
-      "timestamp_end": 2.97,
+      "timestamp_start": 5.17,
+      "timestamp_end": 7.83,
       "rep_id": 0,
       "deviation_score": 1.0,
-      "primary_metric": "Right Ankle Acceleration",
-      "metric_value": "-0.38 vs 0.03",
-      "description": "Right Ankle Acceleration was -0.38, significantly lower than the target of 0.03.",
-      "correction_cue": "Stabilize Ankles"
+      "primary_metric": "Ankle Acceleration",
+      "metric_value": "0.54 vs -0.03 m/s²",
+      "description": "Ankle acceleration peaked at 0.54 m/s², far exceeding target (-0.03 m/s²) by 19281%.",
+      "correction_cue": "Prioritize spinal alignment (neutral spine) over depth."
     }
   ]
 }
