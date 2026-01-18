@@ -7,6 +7,7 @@ const videoContainer = document.getElementById("videoContainer");
 const output = document.getElementById("output");
 const uploadBtn = document.getElementById("uploadBtn");
 const dashboardBtn = document.getElementById("dashboardBtn");
+const analyzeBtn = document.getElementById("analyzeBtn");
 
 // Dropdown selection
 exerciseSelect.addEventListener("change", (e) => {
@@ -46,5 +47,29 @@ videoInput.addEventListener("change", async (e) => {
     output.textContent = `Video saved as: ${data.filename}`;
   } catch (err) {
     output.textContent = "Error saving video: " + err;
+  }
+});
+
+// Analyze button click
+analyzeBtn.addEventListener("click", async () => {
+  if (!videoFile || !selectedExercise) {
+    output.textContent = "Please select an exercise and upload a video first";
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", videoFile);
+  formData.append("exercise", selectedExercise);
+
+  try {
+    const res = await fetch("/api/analyze-video", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();
+    output.textContent = JSON.stringify(data, null, 2);
+  } catch (err) {
+    output.textContent = "Error analyzing video: " + err;
   }
 });
