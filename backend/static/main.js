@@ -57,6 +57,9 @@ analyzeBtn.addEventListener("click", async () => {
     return;
   }
 
+  // Show "Analyzing..." message
+  output.textContent = "Analyzing...";
+
   const formData = new FormData();
   formData.append("file", videoFile);
   formData.append("exercise", selectedExercise);
