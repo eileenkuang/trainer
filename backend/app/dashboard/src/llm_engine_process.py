@@ -20,26 +20,26 @@ load_dotenv(dotenv_path=env_path)
 load_dotenv()
 
 # 1. SETUP CLIENT
-# if not os.getenv("GEMINI_API_KEY"):
-#     raise ValueError("GEMINI_API_KEY is missing from .env file")
+if not os.getenv("GEMINI_API_KEY"):
+    raise ValueError("GEMINI_API_KEY is missing from .env file")
 
-# client = instructor.from_openai(
-#     OpenAI(
-#         base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
-#         api_key=os.getenv("GEMINI_API_KEY")
-#     ),
-#     mode=instructor.Mode.JSON
-# )
-# ai_model = "gemini-2.5-flash"
-
-ai_model = "deepseek/deepseek-r1-0528:free"
 client = instructor.from_openai(
     OpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=os.getenv("DEEPSEEK_API_KEY")
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+        api_key=os.getenv("GEMINI_API_KEY")
     ),
     mode=instructor.Mode.JSON
 )
+ai_model = "gemini-2.5-flash"
+
+# ai_model = "deepseek/deepseek-r1-0528:free"
+# client = instructor.from_openai(
+#     OpenAI(
+#         base_url="https://openrouter.ai/api/v1",
+#         api_key=os.getenv("DEEPSEEK_API_KEY")
+#     ),
+#     mode=instructor.Mode.JSON
+# )
 headers = {
     "Authorization": f"Bearer {os.getenv('DEEPSEEK_API_KEY')}",
     "Content-Type": "application/json" # Common for JSON payloads

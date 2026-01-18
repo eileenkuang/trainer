@@ -10,28 +10,28 @@ from .schemas import WeeklyReport
 load_dotenv() 
 
 # 2. Check for Key
-# api_key = os.getenv("GEMINI_API_KEY")
-# if not api_key:
-#     raise ValueError("GEMINI_API_KEY is missing. Check .env file.")
+api_key = os.getenv("GEMINI_API_KEY")
+if not api_key:
+    raise ValueError("GEMINI_API_KEY is missing. Check .env file.")
 
-# # 3. Setup Client
-# client = instructor.from_openai(
-#     OpenAI(
-#         base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
-#         api_key=api_key
-#     ),
-#     mode=instructor.Mode.JSON
-# )
-# ai_model = "gemini-2.5-flash"
-
+# 3. Setup Client
 client = instructor.from_openai(
     OpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=os.getenv("DEEPSEEK_API_KEY")
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+        api_key=api_key
     ),
     mode=instructor.Mode.JSON
 )
-ai_model = "deepseek/deepseek-r1-0528:free"
+ai_model = "gemini-2.5-flash"
+
+# client = instructor.from_openai(
+#     OpenAI(
+#         base_url="https://openrouter.ai/api/v1",
+#         api_key=os.getenv("DEEPSEEK_API_KEY")
+#     ),
+#     mode=instructor.Mode.JSON
+# )
+# ai_model = "deepseek/deepseek-r1-0528:free"
 
 def calculate_streak(dates: List[str]) -> int:
     """Helper to calculate consecutive days active."""
