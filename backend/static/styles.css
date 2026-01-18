@@ -97,3 +97,65 @@ pre {
   white-space: pre-wrap;
   word-wrap: break-word;
 }
+
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: #9aafab;
+}
+
+.container, .dashboard {
+  max-width: 900px;
+  margin: auto;
+  padding: 2rem;
+}
+
+h1 {
+  text-align: center;
+  color: white;
+}
+
+button, select {
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.video-container {
+  background: white;
+  padding: 1rem;
+  border-radius: 10px;
+}
+
+.dashboard .top-section {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.video-box {
+  flex: 1;
+}
+
+.stats p {
+  color: white;
+  font-size: 1.2rem;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 1rem;
+}
+
+.recommendations {
+  color: white;
+}

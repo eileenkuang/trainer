@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="dashboard">
+    <h1>Dashboard</h1>
+
+    <div class="top-section">
+      <div class="video-box">
+        <p>Your best form:</p>
+        <video id="dashboardVideo" controls></video>
+      </div>
+
+      <div class="stats">
+        <p>Streak: <span id="streak">7</span></p>
+        <p>Total days: <span id="totalDays">30</span></p>
+      </div>
+    </div>
+
+    <div class="cards">
+      <button class="card">Keep your back straight during squats</button>
+      <button class="card">Breathe steadily through each rep</button>
+      <button class="card">Maintain proper foot positioning</button>
+    </div>
+
+    <div class="recommendations">
+      <p>Recommended Exercises:</p>
+      <ul>
+        <li>Squats – 3x12</li>
+        <li>Lunges – 3x10</li>
+        <li>Planks – 3x30s</li>
+      </ul>
+    </div>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

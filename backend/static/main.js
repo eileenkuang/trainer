@@ -14,9 +14,9 @@ exerciseSelect.addEventListener("change", (e) => {
   selectedExercise = e.target.value;
 });
 
-// Dashboard button (placeholder)
+// Dashboard button click → navigate to dashboard
 dashboardBtn.addEventListener("click", () => {
-  console.log("Dashboard clicked");
+  window.location.href = "/dashboard.html";
 });
 
 // Upload button click → open file picker
