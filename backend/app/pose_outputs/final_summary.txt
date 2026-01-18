@@ -1,0 +1,28 @@
+GT rep length: 180 frames, rest before: 0 ms
+User rep length: 61 frames, rest before: 0 ms
+left_elbow: User 134.32 vs GT 145.72 (diff -11.40, tol 10.00) [ISSUE]
+right_elbow: User nan vs GT nan (diff nan, tol 10.00) [OK]
+left_knee: User 133.43 vs GT 162.93 (diff -29.50, tol 10.00) [ISSUE]
+right_knee: User nan vs GT nan (diff nan, tol 10.00) [OK]
+left_hip: User 101.91 vs GT 151.94 (diff -50.04, tol 10.00) [ISSUE]
+right_hip: User nan vs GT nan (diff nan, tol 10.00) [OK]
+left_ankle: User 82.82 vs GT 77.92 (diff 4.91, tol 10.00) [OK]
+right_ankle: User nan vs GT nan (diff nan, tol 10.00) [OK]
+left_elbow_angular_speed: User 1.85 vs GT -0.78 (diff 2.63, tol 5.00) [OK]
+right_elbow_angular_speed: User nan vs GT nan (diff nan, tol 5.00) [OK]
+left_knee_angular_speed: User -15.26 vs GT 0.25 (diff -15.50, tol 5.00) [ISSUE]
+right_knee_angular_speed: User nan vs GT nan (diff nan, tol 5.00) [OK]
+left_hip_angular_speed: User -3.85 vs GT 2.04 (diff -5.89, tol 5.00) [ISSUE]
+right_hip_angular_speed: User nan vs GT nan (diff nan, tol 5.00) [OK]
+left_ankle_angular_speed: User -3.94 vs GT 0.21 (diff -4.15, tol 5.00) [OK]
+right_ankle_angular_speed: User nan vs GT nan (diff nan, tol 5.00) [OK]
+left_elbow_acceleration: User 0.05 vs GT 0.01 (diff 0.04, tol 0.00) [ISSUE]
+right_elbow_acceleration: User nan vs GT nan (diff nan, tol nan) [OK]
+left_hip_acceleration: User 0.01 vs GT 0.01 (diff -0.00, tol 0.00) [ISSUE]
+right_hip_acceleration: User 0.02 vs GT 0.01 (diff 0.01, tol 0.00) [ISSUE]
+left_knee_acceleration: User 0.04 vs GT 0.01 (diff 0.04, tol 0.00) [ISSUE]
+right_knee_acceleration: User nan vs GT nan (diff nan, tol nan) [OK]
+left_ankle_acceleration: User 0.09 vs GT 0.01 (diff 0.09, tol 0.00) [ISSUE]
+right_ankle_acceleration: User nan vs GT 0.03 (diff nan, tol 0.00) [OK]
+GT rep: start 73, end 252, max depth 193
+User rep: start 100, end 160, max depth 134

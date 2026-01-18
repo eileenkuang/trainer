@@ -1,0 +1,4 @@
+rep_id,rep_frames,flagged_frames,flagged_ratio,primary_deviations
+0,180,180,1.0,"left_elbow:9.24, left_hip:4.23, left_ankle:3.05"
+1,130,130,1.0,"left_elbow:11.29, left_hip:4.22, left_ankle:3.00"
+2,60,60,1.0,"left_elbow:11.07, left_hip:4.25, left_ankle:3.38"

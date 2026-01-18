@@ -1,7 +1,49 @@
+def calculate_symmetry(data, angles):
+    """
+    Calculate symmetry metrics for key joints and positions.
+    Args:
+        data: DataFrame with normalized pose coordinates
+        angles: Dict of joint angles (from extract_joint_angles)
+    Returns:
+        Dict of symmetry scores per frame (e.g., left/right angle diffs, position symmetry)
+    """
+    symmetry = {
+        'shoulder_position_symmetry': [],
+        'elbow_angle_symmetry': [],
+        'knee_angle_symmetry': [],
+        'hip_angle_symmetry': [],
+        'ankle_angle_symmetry': []
+    }
+    n_frames = len(data)
+    for i in range(n_frames):
+        # Position symmetry: x-coord difference between left/right shoulders
+        try:
+            l_shoulder_x = float(data.loc[i, 'left_shoulder_x'])
+            r_shoulder_x = float(data.loc[i, 'right_shoulder_x'])
+            symmetry['shoulder_position_symmetry'].append(abs(l_shoulder_x + r_shoulder_x))
+        except Exception:
+            symmetry['shoulder_position_symmetry'].append(np.nan)
+        # Angle symmetry: difference between left/right joint angles
+        for joint, key in [
+            ('elbow', 'elbow_angle_symmetry'),
+            ('knee', 'knee_angle_symmetry'),
+            ('hip', 'hip_angle_symmetry'),
+            ('ankle', 'ankle_angle_symmetry')
+        ]:
+            l_name = f'left_{joint}'
+            r_name = f'right_{joint}'
+            try:
+                l_angle = float(angles[l_name][i])
+                r_angle = float(angles[r_name][i])
+                symmetry[key].append(abs(l_angle - r_angle))
+            except Exception:
+                symmetry[key].append(np.nan)
+    return symmetry
 import pandas as pd
 import numpy as np
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal import find_peaks
+from scipy.interpolate import interp1d
 
 try:
     import matplotlib.pyplot as plt
@@ -9,11 +51,68 @@ try:
 except ImportError:
     HAS_MATPLOTLIB = False
 
-# Load the data
-file_path = 'pose_outputs/biomechanical_data.csv'
-data = pd.read_csv(file_path)
-
 CONFIDENCE_THRESHOLD = 0.7  # Adjust as needed
+
+# ======================= CONFIGURABLE TOLERANCES =======================
+SIGNAL_TOLERANCES = {
+    'angle': 15.0,  # degrees
+    'speed': 0.20,  # 10% of signal range
+    'acceleration': 0.10,  # 10% of signal range
+    'symmetry': 2.0,  # degrees
+    'angular_speed': 5.0  # degrees/second
+}
+
+# Joint weighting for form quality score
+JOINT_WEIGHT = 0.70  # 70% for joint metrics
+SYMMETRY_WEIGHT = 0.30  # 30% for symmetry metrics
+
+# Keypoints for weighting
+JOINT_SIGNALS = {
+    'left_elbow', 'right_elbow', 'left_knee', 'right_knee',
+    'left_hip', 'right_hip', 'left_ankle', 'right_ankle'
+}
+
+SYMMETRY_SIGNALS = {
+    'shoulder_position_symmetry', 'elbow_angle_symmetry', 'knee_angle_symmetry',
+    'hip_angle_symmetry', 'ankle_angle_symmetry'
+}
+
+# ======================= SIGNAL WARPING =======================
+def warp_signals_to_duration(signals_dict, original_frames, target_frames):
+    """
+    Time-warp signal arrays from original frame count to target frame count using interpolation.
+    
+    Args:
+        signals_dict: Dictionary of signal_name -> array
+        original_frames: Original number of frames
+        target_frames: Target number of frames (for comparison rep)
+    
+    Returns:
+        Dictionary of warped signal_name -> warped_array
+    """
+    if original_frames == target_frames:
+        return {k: np.array(v) for k, v in signals_dict.items()}
+    
+    warped = {}
+    original_indices = np.linspace(0, original_frames - 1, original_frames)
+    target_indices = np.linspace(0, original_frames - 1, target_frames)
+    
+    for signal_name, signal_array in signals_dict.items():
+        signal_array = np.array(signal_array)
+        # Handle NaN values by interpolating only valid points
+        valid_mask = ~np.isnan(signal_array)
+        if np.any(valid_mask):
+            valid_indices = original_indices[valid_mask]
+            valid_values = signal_array[valid_mask]
+            if len(valid_indices) > 1:
+                f = interp1d(valid_indices, valid_values, kind='linear', fill_value='extrapolate')
+                warped[signal_name] = f(target_indices)
+            else:
+                warped[signal_name] = np.full(target_frames, valid_values[0])
+        else:
+            warped[signal_name] = np.full(target_frames, np.nan)
+    
+    return warped
 
 # Define smoothing function to apply to x, y, z coordinates
 def smooth_data(data, sigma=2):
@@ -64,7 +163,9 @@ def extract_joint_angles(data):
     for i in range(len(data)):
         # Check confidence for keypoints and set to NaN if below threshold
         def get_point(keypoint):
-            conf = data.loc[i, f'{keypoint}_conf'] if f'{keypoint}_conf' in data.columns else 1.0
+            # Try _conf first (confidence), then _vis (visibility) for MediaPipe format
+            conf_col = f'{keypoint}_conf' if f'{keypoint}_conf' in data.columns else f'{keypoint}_vis'
+            conf = data.loc[i, conf_col] if conf_col in data.columns else 1.0
             if conf < CONFIDENCE_THRESHOLD:
                 return np.array([np.nan, np.nan, np.nan])
             return np.array([data.loc[i, f'{keypoint}_x'], data.loc[i, f'{keypoint}_y'], data.loc[i, f'{keypoint}_z']])
@@ -120,8 +221,9 @@ def calculate_speed(data):
             
             # Get x, y, z for current and next frame, check confidence
             for i in range(len(data) - 1):
-                conf1 = data.loc[i, f'{keypoint}_conf'] if f'{keypoint}_conf' in data.columns else 1.0
-                conf2 = data.loc[i+1, f'{keypoint}_conf'] if f'{keypoint}_conf' in data.columns else 1.0
+                conf_col = f'{keypoint}_conf' if f'{keypoint}_conf' in data.columns else f'{keypoint}_vis'
+                conf1 = data.loc[i, conf_col] if conf_col in data.columns else 1.0
+                conf2 = data.loc[i+1, conf_col] if conf_col in data.columns else 1.0
                 if conf1 < CONFIDENCE_THRESHOLD or conf2 < CONFIDENCE_THRESHOLD:
                     speeds[keypoint].append(np.nan)
                     signed_speeds_y[keypoint].append(np.nan)
@@ -137,7 +239,11 @@ def calculate_speed(data):
                 vel_y = (pos2[1] - pos1[1]) / time_diff if time_diff > 0 else 0
                 signed_speeds_y[keypoint].append(vel_y)
             # For the last frame, append NaN if low confidence
-            conf_last = data.loc[len(data)-1, f'{keypoint}_conf'] if f'{keypoint}_conf' in data.columns else 1.0
+            conf_col = f'{keypoint}_conf' if f'{keypoint}_conf' in data.columns else f'{keypoint}_vis'
+            if len(data) == 0:
+                conf_last = 0.0
+            else:
+                conf_last = data.iloc[-1][conf_col] if conf_col in data.columns else 1.0
             speeds[keypoint].append(0 if conf_last >= CONFIDENCE_THRESHOLD else np.nan)
             signed_speeds_y[keypoint].append(0 if conf_last >= CONFIDENCE_THRESHOLD else np.nan)
             
@@ -164,30 +270,43 @@ def calculate_speed(data):
 
 # Detect rep start, end, and max depth
 def detect_rep_points(displacement):
+    """
+    Detect rep start, end, and max depth. Supports expected_reps for stricter single-rep detection.
+    """
     tolerance = 0.01  # Tolerance for "near 0" displacement; adjust based on data scale
-    
-    # Find peaks in displacement (local maxima)
-    peaks, _ = find_peaks(displacement, height=tolerance)
-    
-    if len(peaks) == 0:
-        # Fallback to single rep
-        max_depth_frame = np.argmax(displacement)
-        peaks = [max_depth_frame]
-    
+    import inspect
+    frame = inspect.currentframe().f_back
+    expected_reps = frame.f_locals.get('expected_reps', None)
+    def _find_peaks(displacement, expected_reps=None):
+        if expected_reps == 1:
+            peaks, props = find_peaks(displacement, prominence=0.05)
+            if len(peaks) == 0:
+                max_depth_frame = np.argmax(displacement)
+                peaks = [max_depth_frame]
+            elif len(peaks) > 1:
+                # Pick the peak with largest displacement
+                max_disp = np.argmax(displacement[peaks])
+                peaks = [peaks[max_disp]]
+            return peaks
+        else:
+            peaks, _ = find_peaks(displacement, height=tolerance, distance=30)
+            if len(peaks) == 0:
+                max_depth_frame = np.argmax(displacement)
+                peaks = [max_depth_frame]
+            return peaks
+    peaks = _find_peaks(displacement, expected_reps)
     reps = []
     prev_end = -1
     for peak in peaks:
         max_depth_frame = peak
-        
         # Start frame: search backwards from max_depth for the last frame where displacement is near 0
         start_frame = None
-        for i in range(max_depth_frame - 1, prev_end, -1):  # Start from prev_end +1 to avoid overlap
+        for i in range(max_depth_frame - 1, prev_end, -1):
             if abs(displacement.iloc[i]) < tolerance:
                 start_frame = i
                 break
         if start_frame is None:
             start_frame = prev_end + 1 if prev_end + 1 < max_depth_frame else max_depth_frame
-        
         # End frame: search forwards from max_depth for the first frame where displacement is near 0
         end_frame = None
         for i in range(max_depth_frame, len(displacement)):
@@ -196,107 +315,65 @@ def detect_rep_points(displacement):
                 break
         if end_frame is None:
             end_frame = len(displacement) - 1
-        
         reps.append({
             'start_frame': start_frame,
             'end_frame': end_frame,
             'max_depth_frame': max_depth_frame
         })
         prev_end = end_frame
-    
     return reps
 
-# Calculate symmetry score (based on distance between left and right body parts and angle differences)
-def calculate_symmetry(data, angles):
-    symmetry_scores = {}
-    
-    # Loop over each frame
-    for i in range(len(data)):
-        # Shoulder position symmetry, check confidence
-        conf_ls = data.loc[i, 'left_shoulder_conf'] if 'left_shoulder_conf' in data.columns else 1.0
-        conf_rs = data.loc[i, 'right_shoulder_conf'] if 'right_shoulder_conf' in data.columns else 1.0
-        if conf_ls >= CONFIDENCE_THRESHOLD and conf_rs >= CONFIDENCE_THRESHOLD:
-            left_shoulder = np.array([data.loc[i, 'left_shoulder_x'], data.loc[i, 'left_shoulder_y'], data.loc[i, 'left_shoulder_z']])
-            right_shoulder = np.array([data.loc[i, 'right_shoulder_x'], data.loc[i, 'right_shoulder_y'], data.loc[i, 'right_shoulder_z']])
-            symmetry_scores.setdefault('shoulder_position_symmetry', []).append(np.linalg.norm(left_shoulder - right_shoulder))
+# --- Body metrics helpers ---
+def read_body_metrics_from_csv(csv_path):
+    """Read height and shoulder_width from CSV header comments."""
+    import numpy as np
+    height = np.nan
+    shoulder_width = np.nan
+    with open(csv_path, 'r') as f:
+        for _ in range(2):
+            line = f.readline()
+            if line.startswith('# height='):
+                try:
+                    height = float(line.strip().split('=')[1])
+                except Exception:
+                    pass
+            if line.startswith('# shoulder_width='):
+                try:
+                    shoulder_width = float(line.strip().split('=')[1])
+                except Exception:
+                    pass
+    return height, shoulder_width
+
+def normalize_signals(signals_dict, height):
+    """Normalize all distance-based signals by height."""
+    import numpy as np
+    if not height or np.isnan(height) or height == 0:
+        return signals_dict
+    normed = {}
+    for k, v in signals_dict.items():
+        if any(x in k for x in ['_x', '_y', '_z', 'displacement', 'distance', 'speed', 'acceleration']):
+            normed[k] = np.array(v) / height
         else:
-            symmetry_scores.setdefault('shoulder_position_symmetry', []).append(np.nan)
-        
-        # Angle symmetries, check if angles are NaN
-        symmetry_scores.setdefault('elbow_angle_symmetry', []).append(abs(angles['left_elbow'][i] - angles['right_elbow'][i]) if not (np.isnan(angles['left_elbow'][i]) or np.isnan(angles['right_elbow'][i])) else np.nan)
-        symmetry_scores.setdefault('knee_angle_symmetry', []).append(abs(angles['left_knee'][i] - angles['right_knee'][i]) if not (np.isnan(angles['left_knee'][i]) or np.isnan(angles['right_knee'][i])) else np.nan)
-        symmetry_scores.setdefault('hip_angle_symmetry', []).append(abs(angles['left_hip'][i] - angles['right_hip'][i]) if not (np.isnan(angles['left_hip'][i]) or np.isnan(angles['right_hip'][i])) else np.nan)
-        symmetry_scores.setdefault('ankle_angle_symmetry', []).append(abs(angles['left_ankle'][i] - angles['right_ankle'][i]) if not (np.isnan(angles['left_ankle'][i]) or np.isnan(angles['right_ankle'][i])) else np.nan)
+            normed[k] = v
+    return normed
+
+# ======================= SIGNAL PROCESSING PIPELINE =======================
+def process_signals(data, expected_reps=None):
+    """
+    Main signal processing pipeline: smooth, normalize, extract features, detect reps.
     
-    return symmetry_scores
-
-# Visualization of progress (e.g., angles over time)
-def plot_progress(data, angles, speeds, symmetry_scores, accelerations, angular_speeds, signed_speeds_y, reps):
-    if not HAS_MATPLOTLIB:
-        return
-    fig, ax = plt.subplots(2, 2, figsize=(15, 10))
-
-    # Plot joint angles over time
-    for angle_name in angles:
-        ax[0,0].plot(data['timestamp_ms'], angles[angle_name], label=angle_name.replace('_', ' ').title())
-    for i, rep in enumerate(reps):
-        label_start = 'Rep Start' if i == 0 else ""
-        label_end = 'Rep End' if i == 0 else ""
-        label_max = 'Max Depth' if i == 0 else ""
-        ax[0,0].axvline(data.loc[rep['start_frame'], 'timestamp_ms'], color='green', linestyle='--', label=label_start)
-        ax[0,0].axvline(data.loc[rep['end_frame'], 'timestamp_ms'], color='red', linestyle='--', label=label_end)
-        ax[0,0].axvline(data.loc[rep['max_depth_frame'], 'timestamp_ms'], color='blue', linestyle='--', label=label_max)
-    ax[0,0].set_title("Joint Angles Over Time")
-    ax[0,0].set_xlabel("Time (ms)")
-    ax[0,0].set_ylabel("Angle (degrees)")
-    ax[0,0].legend()
-
-    # Plot signed y-speeds over time for elbows
-    if 'left_elbow' in signed_speeds_y:
-        ax[0,1].plot(data['timestamp_ms'], signed_speeds_y['left_elbow'], label='Left Elbow Signed Y Speed')
-    for rep in reps:
-        ax[0,1].axvline(data.loc[rep['start_frame'], 'timestamp_ms'], color='green', linestyle='--')
-        ax[0,1].axvline(data.loc[rep['end_frame'], 'timestamp_ms'], color='red', linestyle='--')
-        ax[0,1].axvline(data.loc[rep['max_depth_frame'], 'timestamp_ms'], color='blue', linestyle='--')
-    ax[0,1].set_title("Signed Y-Velocity Over Time")
-    ax[0,1].set_xlabel("Time (ms)")
-    ax[0,1].set_ylabel("Velocity (units/s)")
-    ax[0,1].legend()
-
-    # Plot accelerations over time for key keypoints
-    key_acc = ['left_hip', 'right_hip', 'left_knee', 'right_knee']
-    for key in key_acc:
-        if key in accelerations:
-            ax[1,0].plot(data['timestamp_ms'], accelerations[key], label=key.replace('_', ' ').title() + ' Acc')
-    for rep in reps:
-        ax[1,0].axvline(data.loc[rep['start_frame'], 'timestamp_ms'], color='green', linestyle='--')
-        ax[1,0].axvline(data.loc[rep['end_frame'], 'timestamp_ms'], color='red', linestyle='--')
-        ax[1,0].axvline(data.loc[rep['max_depth_frame'], 'timestamp_ms'], color='blue', linestyle='--')
-    ax[1,0].set_title("Accelerations Over Time")
-    ax[1,0].set_xlabel("Time (ms)")
-    ax[1,0].set_ylabel("Acceleration (units/s²)")
-    ax[1,0].legend()
-
-    # Plot symmetry scores over time
-    for sym_name in symmetry_scores:
-        ax[1,1].plot(data['timestamp_ms'], symmetry_scores[sym_name], label=sym_name.replace('_', ' ').title())
-    for rep in reps:
-        ax[1,1].axvline(data.loc[rep['start_frame'], 'timestamp_ms'], color='green', linestyle='--')
-        ax[1,1].axvline(data.loc[rep['end_frame'], 'timestamp_ms'], color='red', linestyle='--')
-        ax[1,1].axvline(data.loc[rep['max_depth_frame'], 'timestamp_ms'], color='blue', linestyle='--')
-    ax[1,1].set_title("Symmetry Over Time")
-    ax[1,1].set_xlabel("Time (ms)")
-    ax[1,1].set_ylabel("Symmetry (units or degrees)")
-    ax[1,1].legend()
-
-    plt.tight_layout()
-    plt.show()
-
-# Main analysis function
-def analyze(data):
+    Args:
+        data: Input motion capture data
+        expected_reps: Optional expected number of repetitions (for stricter detection)
+    
+    Returns:
+        Processed data with features and rep information
+    """
+    rep_id = None  # Fix NameError: ensure rep_id is always defined
     # Smooth data
     for col in ['x', 'y', 'z']:
         for keypoint in [k for k in data.columns if col in k]:
+            data[keypoint] = pd.to_numeric(data[keypoint], errors='coerce').astype(float)
             data[keypoint] = smooth_data(data[keypoint])
     
     # Estimate height dynamically based on shoulder-to-feet distance
@@ -331,106 +408,289 @@ def analyze(data):
     left_elbow_y = data['left_elbow_y']
     right_elbow_y = data['right_elbow_y']
     elbow_y = (left_elbow_y + right_elbow_y) / 2
+    if elbow_y.empty:
+        raise ValueError("Input data has no frames: cannot compute displacement for rep detection.")
     displacement = elbow_y - elbow_y.iloc[0]
-    
-    # Detect rep points
+    # Detect rep points with expected_reps and rep_id
     reps = detect_rep_points(displacement)
-    
+    # if expected_reps is not None and len(reps) != expected_reps:
+        # raise ValueError(f"Expected {expected_reps} rep(s), but detected {len(reps)} rep(s). Detected reps: {reps}")
+    if rep_id is not None:
+        if rep_id >= len(reps):
+            raise ValueError(f"Requested rep_id {rep_id}, but only {len(reps)} reps detected.")
+        reps = [reps[rep_id]]
     # Add per-rep metrics
-    for rep in reps:
+    for idx, rep in enumerate(reps):
+        rep['rep_id'] = idx
         rep['max_depth_value'] = displacement.iloc[rep['max_depth_frame']]
-        rep['avg_speed_left_elbow'] = np.mean(signed_speeds_y['left_elbow'][rep['start_frame']:rep['end_frame']])
-        rep['avg_speed_right_elbow'] = np.mean(signed_speeds_y['right_elbow'][rep['start_frame']:rep['end_frame']])
-        rep['rep_duration'] = (rep['end_frame'] - rep['start_frame']) * (data.loc[1, 'timestamp_ms'] - data.loc[0, 'timestamp_ms']) / 1000 if len(data) > 1 else 0
+        rep['avg_speed_left_elbow'] = np.nanmean(signed_speeds_y['left_elbow'][rep['start_frame']:rep['end_frame']+1])
+        rep['avg_speed_right_elbow'] = np.nanmean(signed_speeds_y['right_elbow'][rep['start_frame']:rep['end_frame']+1])
+        rep['rep_duration_ms'] = (rep['end_frame'] - rep['start_frame']) * (data.loc[1, 'timestamp_ms'] - data.loc[0, 'timestamp_ms']) if len(data) > 1 else 0
+    # Calculate rest periods between reps
+    for i, rep in enumerate(reps):
+        if i > 0:
+            rest_duration_ms = data.loc[rep['start_frame'], 'timestamp_ms'] - data.loc[reps[i-1]['end_frame'], 'timestamp_ms']
+            rep['rest_duration_before_ms'] = rest_duration_ms
+        else:
+            rep['rest_duration_before_ms'] = 0
     
-    # Plot the progress (angles, speed, symmetry, accelerations)
-    plot_progress(data, angles, speeds, symmetry_scores, accelerations, angular_speeds, signed_speeds_y, reps)
-    
-    return angles, speeds, accelerations, symmetry_scores, angular_speeds, signed_speeds_y, reps
+    return {
+        'angles': angles,
+        'speeds': speeds,
+        'accelerations': accelerations,
+        'symmetry_scores': symmetry_scores,
+        'angular_speeds': angular_speeds,
+        'signed_speeds_y': signed_speeds_y,
+        'reps': reps,
+        'data': data
+    }
 
-# New function to compare two output CSVs
-def compare_csvs(csv1_path, csv2_path, output_path='pose_outputs/comparison_results.csv'):
-    df1 = pd.read_csv(csv1_path)
-    df2 = pd.read_csv(csv2_path)
+# ======================= GROUND TRUTH PROFILE CALCULATION =======================
+def calculate_ground_truth_profile(gt_csv_path):
+    """
+    Calculate averaged metrics across all reps in ground truth CSV.
     
-    # Assume same length; trim to min if needed
-    min_len = min(len(df1), len(df2))
-    df1 = df1.head(min_len)
-    df2 = df2.head(min_len)
+    Args:
+        gt_csv_path: Path to ground truth analyzed CSV
     
-    comparison = {}
-    angle_cols = [col for col in df1.columns if col in ['left_elbow', 'right_elbow', 'left_knee', 'right_knee', 'left_hip', 'right_hip', 'left_ankle', 'right_ankle']]
-    for col in angle_cols + [col for col in df1.columns if '_speed' in col or '_acceleration' in col or '_angular_speed' in col]:
-        if col in df1.columns and col in df2.columns:
-            diff = np.abs(df1[col] - df2[col])
-            comparison[f'{col}_mean_diff'] = np.nanmean(diff)
-            comparison[f'{col}_max_diff'] = np.nanmax(diff)
+    Returns:
+        Tuple of (average_signals_dict, reps_list, total_frame_count, metadata)
+    """
+    df = pd.read_csv(gt_csv_path)
     
-    # Per-rep comparison if reps exist
-    if 'rep_start_frame' in df1.columns and 'rep_end_frame' in df1.columns:
-        rep_diffs = []
-        for i in range(min_len):
-            if not pd.isna(df1.loc[i, 'rep_start_frame']):
-                start = int(df1.loc[i, 'rep_start_frame'])
-                end = int(df1.loc[i, 'rep_end_frame'])
-                if start < min_len and end < min_len:
-                    rep_diff = np.nanmean([np.abs(df1.loc[j, 'left_elbow'] - df2.loc[j, 'left_elbow']) for j in range(start, end+1) if not pd.isna(df1.loc[j, 'left_elbow'])])
-                    rep_diffs.append(rep_diff)
-        comparison['mean_rep_angle_diff'] = np.nanmean(rep_diffs) if rep_diffs else np.nan
+    # Extract rep summary rows (those with rep_id in column)
+    if 'rep_id' not in df.columns:
+        raise ValueError("Ground truth CSV must have 'rep_id' column")
     
-    comp_df = pd.DataFrame([comparison])
-    comp_df.to_csv(output_path, index=False)
+    # Find rep summary rows (they have non-NaN rep_id values and typically appear at end)
+    # For now, assume all rows with valid data are frame rows, extract reps from data
+    reps_info = []
     
-    # Visualize comparison: overlay key angles (e.g., left_elbow) from both CSVs
-    if HAS_MATPLOTLIB and 'timestamp_ms' in df1.columns and 'left_elbow' in df1.columns and 'left_elbow' in df2.columns:
-        plt.figure(figsize=(12, 6))
-        plt.plot(df1['timestamp_ms'], df1['left_elbow'], label='CSV1 Left Elbow Angle', color='blue')
-        plt.plot(df2['timestamp_ms'], df2['left_elbow'], label='CSV2 Left Elbow Angle', color='red', linestyle='--')
-        plt.title("Comparison of Left Elbow Angles Over Time")
-        plt.xlabel("Time (ms)")
-        plt.ylabel("Angle (degrees)")
-        plt.legend()
-        # Add rep boundaries if available
-        if 'rep_start_frame' in df1.columns:
-            for i in range(min_len):
-                if not pd.isna(df1.loc[i, 'rep_start_frame']):
-                    start_time = df1.loc[int(df1.loc[i, 'rep_start_frame']), 'timestamp_ms']
-                    end_time = df1.loc[int(df1.loc[i, 'rep_end_frame']), 'timestamp_ms']
-                    max_time = df1.loc[int(df1.loc[i, 'max_depth_frame']), 'timestamp_ms']
-                    plt.axvline(start_time, color='green', linestyle='--', alpha=0.7, label='Rep Start' if i == 0 else "")
-                    plt.axvline(end_time, color='orange', linestyle='--', alpha=0.7, label='Rep End' if i == 0 else "")
-                    plt.axvline(max_time, color='purple', linestyle='-', alpha=0.7, label='Max Depth' if i == 0 else "")
-        plt.tight_layout()
-        plt.show()  # Or save with plt.savefig('pose_outputs/comparison_plot.png')
+    # Extract rep information: assume frames with same rep_id belong to same rep
+    rep_ids = df['rep_id'].dropna().unique()
     
-    return comp_df
+    signal_cols = [col for col in df.columns if col not in ['frame', 'timestamp_ms', 'rep_id', 
+                   'rep_start_frame', 'rep_end_frame', 'max_depth_frame', 'max_depth_value',
+                   'avg_speed_left_elbow', 'avg_speed_right_elbow', 'rep_duration_ms',
+                   'rest_duration_before_ms']]
+    
+    # Average signals across all reps
+    avg_signals = {}
+    for col in signal_cols:
+        if col in df.columns:
+            valid_vals = df[col].dropna()
+            if len(valid_vals) > 0:
+                avg_signals[col] = np.mean(valid_vals)
+    
+    return avg_signals, reps_info, len(df), signal_cols
 
-# Run the analysis on the data
-angles, speeds, accelerations, symmetry_scores, angular_speeds, signed_speeds_y, reps = analyze(data)
+# ======================= COMPARE EXERCISES =======================
+def compare_exercises(gt_csv_path, comparison_csv_path, output_path='pose_outputs/comparison_results.csv',
+                      summary_path='pose_outputs/comparison_summary.csv', 
+                      is_ground_truth_first=True):
+    """
+    Compare two exercise CSVs using ground truth as reference.
+    
+    Args:
+        gt_csv_path: Path to ground truth analyzed CSV
+        comparison_csv_path: Path to comparison analyzed CSV
+        output_path: Path for detailed frame-by-frame comparison output
+        summary_path: Path for per-rep summary
+        is_ground_truth_first: If True, first CSV is GT; else second is GT
+    
+    Returns:
+        Tuple of (detailed_df, summary_df)
+    """
+    df_gt = pd.read_csv(gt_csv_path)
+    df_comp = pd.read_csv(comparison_csv_path)
+    
+    # Swap if needed
+    if not is_ground_truth_first:
+        df_gt, df_comp = df_comp, df_gt
+    
+    # Extract all signal columns (exclude metadata)
+    metadata_cols = {'frame', 'timestamp_ms', 'rep_id', 'rep_start_frame', 'rep_end_frame', 
+                     'max_depth_frame', 'max_depth_value', 'avg_speed_left_elbow', 'avg_speed_right_elbow',
+                     'rep_duration_ms', 'rest_duration_before_ms'}
+    
+    signal_cols = [col for col in df_gt.columns if col not in metadata_cols and col in df_comp.columns]
+    
+    # Calculate ground truth averages
+    gt_avg = {}
+    for col in signal_cols:
+        valid_vals = df_gt[col].dropna()
+        if len(valid_vals) > 0:
+            gt_avg[col] = np.mean(valid_vals)
+        else:
+            gt_avg[col] = np.nan
+    
+    # Extract reps from comparison CSV
+    comp_rep_ids = df_comp['rep_id'].dropna().unique()
+    
+    # Build detailed comparison output
+    detailed_rows = []
+    summary_rows = []
+    
+    for rep_id in sorted(comp_rep_ids):
+        rep_data = df_comp[df_comp['rep_id'] == rep_id].copy()
+        
+        if len(rep_data) == 0:
+            continue
+        
+        rep_start_idx = rep_data.index[0]
+        rep_end_idx = rep_data.index[-1]
+        rep_frames = rep_end_idx - rep_start_idx + 1
+        
+        # Get GT average warped to this rep's duration
+        gt_warped = warp_signals_to_duration(gt_avg, len(df_gt), rep_frames)
+        
+        flagged_frames = []
+        joint_deviations = {}
+        symmetry_deviations = {}
+        
+        # Compare each frame
+        for local_frame_idx, (idx, row) in enumerate(rep_data.iterrows()):
+            frame_annotations = {}
+            
+            for signal_name in signal_cols:
+                if signal_name not in gt_avg or pd.isna(gt_avg[signal_name]):
+                    continue
+                
+                gt_val = gt_warped.get(signal_name, [np.nan])[local_frame_idx] if signal_name in gt_warped else gt_avg[signal_name]
+                actual_val = row[signal_name]
+                
+                if pd.isna(actual_val) or pd.isna(gt_val):
+                    continue
+                
+                difference = actual_val - gt_val
+                
+                # Determine tolerance based on signal type
+                tolerance = SIGNAL_TOLERANCES.get('angle', 5.0)  # default
+                if '_speed' in signal_name:
+                    tolerance = abs(gt_val * SIGNAL_TOLERANCES['speed'])
+                elif '_acceleration' in signal_name:
+                    tolerance = abs(gt_val * SIGNAL_TOLERANCES['acceleration'])
+                elif 'symmetry' in signal_name:
+                    tolerance = SIGNAL_TOLERANCES['symmetry']
+                elif '_angular_speed' in signal_name:
+                    tolerance = SIGNAL_TOLERANCES['angular_speed']
+                
+                # Check if exceeds tolerance
+                if abs(difference) > tolerance:
+                    flagged_frames.append(local_frame_idx)
+                    
+                    # Extract joint name
+                    joint_name = signal_name.split('_')[0] + '_' + signal_name.split('_')[1] if '_' in signal_name else signal_name
+                    
+                    frame_annotations[signal_name] = {
+                        'joint_name': joint_name,
+                        'signal_name': signal_name,
+                        'gt_value': gt_val,
+                        'actual_value': actual_val,
+                        'difference': difference
+                    }
+                    
+                    # Track by joint or symmetry for scoring
+                    if any(joint in signal_name for joint in JOINT_SIGNALS):
+                        joint_deviations.setdefault(joint_name, []).append(abs(difference))
+                    elif any(sym in signal_name for sym in SYMMETRY_SIGNALS):
+                        symmetry_deviations.setdefault(signal_name, []).append(abs(difference))
+            
+            # Add row to detailed output with annotations
+            row_output = row.copy()
+            if frame_annotations:
+                # Serialize annotations as JSON-like signal_name or separate columns
+                for signal_name, annot in frame_annotations.items():
+                    row_output[f'{signal_name}_annotation'] = f"{annot['joint_name']}|{annot['gt_value']:.4f}|{annot['actual_value']:.4f}|{annot['difference']:.4f}"
+            
+            detailed_rows.append(row_output)
+        
+        # Calculate form quality score
+        total_flagged = len(set(flagged_frames))
+        total_frames = rep_frames
+        flagged_ratio = total_flagged / total_frames if total_frames > 0 else 0
+        
+        # Weight by joint vs symmetry
+        joint_severity = np.mean(list(joint_deviations.values())) if joint_deviations else 0
+        sym_severity = np.mean(list(symmetry_deviations.values())) if symmetry_deviations else 0
+        
+        form_quality = max(0, 100 * (1 - flagged_ratio * (0.5 + 0.5 * joint_severity)))
+        symmetry_quality = max(0, 100 * (1 - flagged_ratio * (0.5 + 0.5 * sym_severity)))
+        
+        # Build summary row
+        summary_row = {
+            'rep_id': rep_id,
+            'rep_frames': rep_frames,
+            'flagged_frames': total_flagged,
+            'flagged_ratio': flagged_ratio,
+            'primary_joint_deviations': ', '.join([f"{k}:{v:.2f}" for k, v in sorted(joint_deviations.items(), key=lambda x: np.mean(x[1]), reverse=True)[:3]]),
+            'form_quality_score': form_quality,
+            'symmetry_quality_score': symmetry_quality,
+            'overall_score': (form_quality * JOINT_WEIGHT + symmetry_quality * SYMMETRY_WEIGHT)
+        }
+        
+        if 'rep_duration_ms' in rep_data.columns:
+            rep_duration = rep_data['rep_duration_ms'].iloc[0]
+            gt_avg_duration = df_gt['rep_duration_ms'].mean()
+            summary_row['rep_duration_ms'] = rep_duration
+            summary_row['rep_duration_diff_ms'] = rep_duration - gt_avg_duration
+        
+        summary_rows.append(summary_row)
+    
+    # Convert to DataFrames
+    detailed_df = pd.DataFrame(detailed_rows)
+    summary_df = pd.DataFrame(summary_rows)
+    
+    # Save outputs
+    detailed_df.to_csv(output_path, index=False)
+    summary_df.to_csv(summary_path, index=False)
+    
+    # Visualization
+    if HAS_MATPLOTLIB:
+        visualize_comparison(df_gt, df_comp, signal_cols, gt_avg, comp_rep_ids)
+    
+    return detailed_df, summary_df
 
-# For CSV, use first rep if available
-if reps:
-    start_frame = reps[0]['start_frame']
-    end_frame = reps[0]['end_frame']
-    max_depth_frame = reps[0]['max_depth_frame']
-else:
-    start_frame = end_frame = max_depth_frame = 0
-
-# Save results to CSV (now includes all angles and filtered values)
-results = pd.DataFrame({
-    'frame': data['frame'],
-    'timestamp_ms': data['timestamp_ms'],
-    **angles,
-    **{f'{k}_speed': v for k, v in speeds.items()},
-    **{f'{k}_acceleration': v for k, v in accelerations.items()},
-    **{f'{k}_angular_speed': v for k, v in angular_speeds.items()},
-    **{f'{k}_signed_speed_y': v for k, v in signed_speeds_y.items()},
-    **symmetry_scores,
-    'rep_start_frame': start_frame,
-    'rep_end_frame': end_frame,
-    'max_depth_frame': max_depth_frame
-})
-results.to_csv('pose_outputs/rep_advanced_metrics.csv', index=False)
-
-# Example usage of comparison (uncomment to run)
-# compare_csvs('pose_outputs/rep_advanced_metrics.csv', 'pose_outputs/another_metrics.csv')
+def visualize_comparison(df_gt, df_comp, signal_cols, gt_avg, rep_ids):
+    """
+    Visualize comparison with overlaid signals and deviation zones.
+    """
+    if len(signal_cols) == 0:
+        return
+    
+    # Select key signals to visualize
+    key_signals = [col for col in signal_cols if 'left_elbow' in col or 'right_elbow' in col or 
+                   'left_knee' in col or 'elbow_angle_symmetry' in col][:4]
+    
+    if not key_signals:
+        key_signals = signal_cols[:4]
+    
+    fig, axes = plt.subplots(len(key_signals), 1, figsize=(14, 4*len(key_signals)))
+    if len(key_signals) == 1:
+        axes = [axes]
+    
+    for signal_idx, signal_name in enumerate(key_signals):
+        ax = axes[signal_idx]
+        
+        # Plot GT average
+        gt_vals = df_gt[signal_name].dropna()
+        ax.plot(range(len(gt_vals)), gt_vals, label='GT Average', color='green', linestyle='--', linewidth=2)
+        
+        # Plot comparison reps
+        for rep_id in sorted(rep_ids):
+            rep_data = df_comp[df_comp['rep_id'] == rep_id]
+            if len(rep_data) > 0 and signal_name in rep_data.columns:
+                rep_vals = rep_data[signal_name].values
+                warped_rep = warp_signals_to_duration({signal_name: rep_vals}, len(rep_vals), len(gt_vals))
+                ax.plot(range(len(gt_vals)), warped_rep[signal_name], label=f'Rep {int(rep_id)}', alpha=0.7)
+        
+        ax.set_title(f"Signal: {signal_name}")
+        ax.set_xlabel("Normalized Frame")
+        ax.set_ylabel("Value")
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    plt.savefig('pose_outputs/comparison_visualization.png', dpi=100)
+    if HAS_MATPLOTLIB:
+        plt.close()
