@@ -57,8 +57,8 @@ def render_video(video_path, json_path, output_path):
     # 2. UX Fix: Extend short events to minimum 2.0 seconds
     for event in events:
         duration = event["end_time"] - event["start_time"]
-        if duration < 2.0:
-            event["end_time"] = event["start_time"] + 2.0
+        if duration < 4.0:
+            event["end_time"] = event["start_time"] + 4.0
 
     # 3. Open Video
     if not os.path.exists(video_path):

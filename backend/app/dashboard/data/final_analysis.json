@@ -1,73 +1,33 @@
 {
   "user_skill_level": "Beginner",
-  "general_summary": "Overall, you've shown a great start with your form, achieving a perfect repetition with excellent spinal alignment. However, there are a few areas to focus on for consistent improvement, specifically keeping your head neutral, ensuring a full lockout, and controlling your tempo during the eccentric phase. With a little practice on these points, your form will become much more stable and efficient!",
+  "general_summary": "The lift showed significant ankle stability issues. Focus on mastering spinal alignment fundamentals to build a strong foundation and prevent compensations.",
   "gamification": {
-    "form_score": 58,
-    "xp_earned": 150,
-    "current_level_title": "Form Explorer",
+    "form_score": 65,
+    "xp_earned": 15,
+    "current_level_title": "Stability Rookie",
     "streak_bonus": false
   },
-  "strengths": [
-    "Consistent spinal alignment in well-executed repetitions",
-    "Good overall form and range of motion when focused"
-  ],
+  "strengths": [],
   "weaknesses": [
-    "Cervical spine control (head dropping forward)",
-    "Incomplete lockout at the top of the movement",
-    "Lack of control during the eccentric (lowering) phase"
+    "Ankle Stability"
   ],
   "remedial_plan": [
     {
-      "name": "Chin Tucks",
-      "target_fault": "Cervical spine flexion",
-      "prescription": "3 sets of 10-15 controlled repetitions",
-      "adaptive_reasoning": "This exercise strengthens the deep neck flexors and improves awareness of a neutral head position, helping you maintain proper cervical alignment during your main lifts."
-    },
-    {
-      "name": "Scapular Push-ups",
-      "target_fault": "Incomplete lockout",
-      "prescription": "3 sets of 10-12 repetitions",
-      "adaptive_reasoning": "Focusing on scapular protraction and retraction helps improve stability and strength at the end range of extension, directly addressing the incomplete lockout issue."
-    },
-    {
-      "name": "Controlled Eccentric Reps",
-      "target_fault": "Rapid eccentric tempo",
-      "prescription": "3 sets of 5-8 repetitions with a 3-second lowering phase",
-      "adaptive_reasoning": "By deliberately slowing down the lowering phase, you build muscle control, strength, and tissue resilience, which is crucial for preventing loss of control and potential injury."
+      "name": "Single-Leg Balance Holds",
+      "target_fault": "Ankle Instability",
+      "prescription": "3 sets × 30 seconds per leg",
+      "adaptive_reasoning": "Builds proprioception and ankle strength to improve joint control during lifts"
     }
   ],
   "timeline_events": [
     {
-      "start_time": 1.5,
-      "end_time": 3.0,
-      "overlay_text": "Excellent form!",
-      "detailed_explanation": "Fantastic job on this repetition! Your form was nearly perfect, maintaining a neutral spine throughout the movement and achieving a full range of motion. This is exactly what we're looking for, keep up this great consistency!",
-      "correction_cue": "strength",
-      "status_color": "green"
-    },
-    {
-      "start_time": 4.5,
-      "end_time": 6.0,
-      "overlay_text": "Head neutral!",
-      "detailed_explanation": "During this rep, your head dropped forward quite a bit, causing excessive flexion in your cervical spine. This can put unnecessary strain on your neck. Focus on keeping your head in line with your spine, imagining you're holding a small orange under your chin.",
-      "correction_cue": "weakness",
-      "status_color": "red"
-    },
-    {
-      "start_time": 7.5,
-      "end_time": 9.0,
-      "overlay_text": "Full lockout!",
-      "detailed_explanation": "You're almost there! At the top of this repetition, your elbows weren't fully extended, indicating an incomplete lockout. Aim for a complete, controlled extension without hyperextending. This ensures you're engaging your muscles through their full range.",
-      "correction_cue": "weakness",
-      "status_color": "yellow"
-    },
-    {
-      "start_time": 10.5,
-      "end_time": 12.0,
-      "overlay_text": "Control descent!",
-      "detailed_explanation": "Your descent (eccentric phase) was a bit too quick here, which can lead to a loss of control at the bottom. A slower, more deliberate lowering phase (think 2-3 seconds) is vital for building strength and stability, and preventing injury.",
+      "start_time": 2.93,
+      "end_time": 2.97,
+      "overlay_text": "Neutral Spine First!",
+      "detailed_explanation": "Your ankle instability occurs when leaning too far forward. Maintain a neutral spine alignment to distribute weight evenly through both feet and reduce ankle stress.",
       "correction_cue": "weakness",
       "status_color": "red"
     }
-  ]
+  ],
+  "annotated_video_filename": "annotated_user_test_session_01.mp4"
 }

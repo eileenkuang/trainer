@@ -44,6 +44,7 @@ class AnalysisResult(BaseModel):
     weaknesses: List[str]
     remedial_plan: List[RemedialExercise]
     timeline_events: List[VideoEvent]
+    annotated_video_filename: str
 
 # --- 2. Meta-Analysis (Weekly Report) Schemas ---
 

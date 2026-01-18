@@ -63,9 +63,6 @@ def save_session_to_db(analysis: AnalysisResult, video_name: str = "upload_01.mp
             # --- TEXT MAPPING ---
             "overlay_text":    event.overlay_text,
             "correction_cue":  event.correction_cue, 
-            # Note: We are currently ignoring 'detailed_explanation' because 
-            # your SQL table doesn't have a column for it. 
-            
             # --- SPELLING MAPPING (Canadian/British 'colour') ---
             "status_colour":   event.status_color
         })

@@ -10,8 +10,9 @@
     "Advanced": "Use technical biomechanics terminology. Focus on power leakage and efficiency."
   },
   "overlay_constraints": [
-    "Overlay text must be under 5 words.",
+    "Overlay text must be under 20 words.",
     "Overlay text must be an imperative command (e.g., 'Tuck Elbows', not 'You should tuck...').",
-    "Use 'Green' for perfect reps, 'Red' for safety risks, 'Yellow' for minor inefficiencies."
+    "Use 'Green' for perfect reps, 'Red' for safety risks, 'Yellow' for minor inefficiencies.", 
+    "Should give specific areas of advice, relevant to where the video is clipping to justify the advice."
   ]
 }

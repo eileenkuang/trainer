@@ -13,6 +13,7 @@ os.chdir(backend_dir)
 # Set up paths
 from video_processing.analysis import process_signals, warp_signals_to_duration, SIGNAL_TOLERANCES, JOINT_WEIGHT, SYMMETRY_WEIGHT, JOINT_SIGNALS, SYMMETRY_SIGNALS, read_body_metrics_from_csv, normalize_signals
 from video_processing.video_handler import process_video
+from full_pipeline import run_pipeline as run_full_pipeline
 
 def get_signal_type(signal_name):
     if 'symmetry' in signal_name: return 'symmetry'
@@ -207,7 +208,10 @@ def analyze(USER_VIDEO):
     os.makedirs(os.path.dirname(comparison_path), exist_ok=True)
     comparison_df.to_csv(comparison_path, index=False)
     print(f"✓ user_comparison.csv ({len(comparison_df)} rows)")
-    return 1;
+
+    if not run_full_pipeline(USER_VIDEO): 
+        return False 
+    return True 
 
 if __name__ == "__main__":
     analyze('./video_processing/data_temp/2222_clip.mp4')

@@ -3,13 +3,14 @@
   "fps": 30,
   "comparison_metrics": [
     {
-      "timestamp_start": 3.73,
-      "timestamp_end": 5.1,
+      "timestamp_start": 2.93,
+      "timestamp_end": 2.97,
       "rep_id": 0,
       "deviation_score": 1.0,
-      "primary_metric": "Left Knee Angle",
-      "metric_value": "145° vs 162°",
-      "description": "Significant deviation detected. The left knee angle was 145.35 degrees, which was less than the expected 162.12 degrees, deviating by 16.76 degrees."
+      "primary_metric": "Ankle Stability",
+      "metric_value": "-0.38 vs 0.03",
+      "description": "Right ankle acceleration measured at -0.38, falling significantly below the target of 0.03.",
+      "correction_cue": "Prioritize spinal alignment (neutral spine) over depth."
     }
   ]
 }
