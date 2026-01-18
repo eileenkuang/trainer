@@ -46,7 +46,7 @@ select {
   padding: 0.5rem 1rem;
   border-radius: 9999px;
   border: 1px solid #2d3b3b;
-  background-color: #d4e4d4;
+  background-color: #d4e4e4;
   color: #2d3b3b;
   width: 200px;
 }
@@ -60,8 +60,8 @@ select {
 
 .dashboard-btn {
   padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  border: 1px solid #2d3b3b;
+  border-radius: 8px;
+  border: none;
   background-color: #d4e4e4;
   color: #2d3b3b;
   cursor: pointer;
@@ -104,7 +104,8 @@ body {
   background: #9aafab;
 }
 
-.container, .dashboard {
+.container,
+.dashboard {
   max-width: 900px;
   margin: auto;
   padding: 2rem;
@@ -115,7 +116,8 @@ h1 {
   color: white;
 }
 
-button, select {
+button,
+select {
   padding: 0.7rem 1rem;
   border-radius: 8px;
   border: none;
@@ -138,6 +140,11 @@ button, select {
   flex: 1;
 }
 
+.dashboard .video-box p {
+  color: white !important;
+  font-size: 1.2rem;
+}
+
 .stats p {
   color: white;
   font-size: 1.2rem;
@@ -154,6 +161,10 @@ button, select {
   background: white;
   border-radius: 16px;
   padding: 1rem;
+}
+
+.card:hover {
+  background: white;
 }
 
 .recommendations {
