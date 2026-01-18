@@ -1,13 +1,29 @@
-# --- Imports and Config ---
 import cv2
 import mediapipe as mp
 import numpy as np
 import os
 import csv
+import re
+import subprocess
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
+from twelvelabs import TwelveLabs
+from dotenv import load_dotenv
 
+load_dotenv()
+
+# --- Configuration ---
+VIDEO_PATH = './data_temp/IMG_2221.MOV'
+OUTPUT_FOLDER = './pose_outputs'
+MODEL_PATH = './mediapipe/pose_landmarker_lite.task'
+CSV_OUTPUT = os.path.join(OUTPUT_FOLDER, 'biomechanical_data.csv')
+
+TWELVELABS_API_KEY = os.getenv("TWELVELABS_API_KEY")
+
+# MediaPipe Configuration
 MIN_CONFIDENCE = 0.4
+SMOOTHING_WINDOW_SIZE = 15 
+
 LANDMARK_NAMES = [
     "nose", "left_eye_inner", "left_eye", "left_eye_outer", "right_eye_inner", 
     "right_eye", "right_eye_outer", "left_ear", "right_ear", "mouth_left", 
@@ -17,51 +33,88 @@ LANDMARK_NAMES = [
     "left_knee", "right_knee", "left_ankle", "right_ankle", "left_heel", 
     "right_heel", "left_foot_index", "right_foot_index"
 ]
-SMOOTHING_WINDOW_SIZE = 25
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "mediapipe", "pose_landmarker_lite.task")
 
-def smooth_landmarks(landmarks_history):
-    smoothed_landmarks = []
-    for i in range(len(landmarks_history[0])):
-        x_vals = [landmarks_history[j][i][0] for j in range(len(landmarks_history))]
-        y_vals = [landmarks_history[j][i][1] for j in range(len(landmarks_history))]
-        z_vals = [landmarks_history[j][i][2] for j in range(len(landmarks_history))]
-        vis_vals = [landmarks_history[j][i][3] for j in range(len(landmarks_history))]
-        smoothed_x = np.mean(x_vals)
-        smoothed_y = np.mean(y_vals)
-        smoothed_z = np.mean(z_vals)
-        smoothed_vis = np.mean(vis_vals)
-        smoothed_landmarks.append((smoothed_x, smoothed_y, smoothed_z, smoothed_vis))
-    return smoothed_landmarks
+class PushUpTimestampDetector:
+    """Uses TwelveLabs Pegasus to find rep boundaries."""
+    def __init__(self, api_key):
+        if not api_key:
+            raise ValueError("TWELVELABS_API_KEY not found in environment.")
+        self.client = TwelveLabs(api_key=api_key)
+        self.index_id = None
+    
+    def setup_and_get_timestamps(self, video_path):
+        # Create Index
+        print("Creating TwelveLabs index...")
+        index = self.client.indexes.create(
+            index_name="Pushup-Analysis-Task",
+            models=[{"model_name": "pegasus1.2", "model_options": ["visual"]}]
+        )
+        self.index_id = index.id
+
+        # Upload
+        print(f"Uploading video: {video_path}")
+        task = self.client.tasks.create(index_id=self.index_id, video_file=video_path)
+        task.wait_for_done(sleep_interval=5)
+        
+        # Pegasus Analysis
+        print("TwelveLabs Pegasus is identifying repetitions...")
+        prompt = """Identify every single push-up repetition in this video. 
+        For each rep, provide the exact start (descending) and end (fully returned) timestamps.
+        Format your response exactly like this:
+        [start_time] - [end_time] rep
+        Example: [0:02.1] - [0:04.5] rep"""
+
+        result = self.client.generate.text(video_id=task.video_id, prompt=prompt)
+        return self._parse_timestamps(result.data)
+
+    def _parse_timestamps(self, text):
+        # Pattern to extract [M:SS.S] or [SS.S]
+        pattern = r'\[(\d+:)?(\d+\.?\d*)\]'
+        matches = re.finditer(pattern, text)
+        timestamps = []
+        for m in matches:
+            mins = int(m.group(1).replace(':', '')) if m.group(1) else 0
+            secs = float(m.group(2))
+            timestamps.append(mins * 60 + secs)
+        
+        # Group timestamps into pairs (Start, End)
+        pairs = []
+        for i in range(0, len(timestamps) - 1, 2):
+            pairs.append({'start': timestamps[i], 'end': timestamps[i+1]})
+        
+        print(f"Detected {len(pairs)} push-up repetitions.")
+        return pairs
+
+def smooth_landmarks(history):
+    """Simple moving average smoothing logic."""
+    if not history: return None
+    smoothed = []
+    num_landmarks = len(history[0])
+    for i in range(num_landmarks):
+        x = np.mean([frame[i][0] for frame in history])
+        y = np.mean([frame[i][1] for frame in history])
+        z = np.mean([frame[i][2] for frame in history])
+        v = np.mean([frame[i][3] for frame in history])
+        smoothed.append((x, y, z, v))
+    return smoothed
 
 def get_confidence_color(confidence):
-    green = int(255 * confidence)
-    red = int(255 * (1 - confidence))
-    return (0, green, red)
+    """Green for high confidence, Red for low."""
+    return (0, int(255 * confidence), int(255 * (1 - confidence)))
 
-def compute_body_metrics(landmarks):
-    # Returns (height, shoulder_width) in normalized units (not cm)
-    # height: mean of left_shoulder-to-left_ankle and right_shoulder-to-right_ankle
-    def dist(a, b):
-        return np.sqrt((a[0]-b[0])**2 + (a[1]-b[1])**2 + (a[2]-b[2])**2)
-    try:
-        l_shoulder = landmarks[LANDMARK_NAMES.index('left_shoulder')][:3]
-        r_shoulder = landmarks[LANDMARK_NAMES.index('right_shoulder')][:3]
-        l_ankle = landmarks[LANDMARK_NAMES.index('left_ankle')][:3]
-        r_ankle = landmarks[LANDMARK_NAMES.index('right_ankle')][:3]
-        height = (dist(l_shoulder, l_ankle) + dist(r_shoulder, r_ankle)) / 2
-        shoulder_width = dist(l_shoulder, r_shoulder)
-        return height, shoulder_width
-    except Exception:
-        return np.nan, np.nan
+def extract_segment(video_path, start, end, out_path):
+    """Cuts the video using FFmpeg for targeted MediaPipe analysis."""
+    duration = end - start
+    cmd = [
+        "ffmpeg", "-ss", str(max(0, start - 0.2)), # Small buffer
+        "-i", video_path, 
+        "-t", str(duration + 0.4), 
+        "-c:v", "libx264", "-avoid_negative_ts", "make_zero", "-y", out_path
+    ]
+    subprocess.run(cmd, capture_output=True)
 
-def process_video(video_path, output_csv_path):
-    """
-    Extracts pose landmarks from video, smooths, and writes to CSV with body metrics in header.
-    """
-    if not os.path.exists(os.path.dirname(output_csv_path)):
-        os.makedirs(os.path.dirname(output_csv_path))
-
+def analyze_segment(segment_path, rep_idx, absolute_start_sec):
+    """Processes a single rep segment with MediaPipe Tasks."""
     base_options = python.BaseOptions(model_asset_path=MODEL_PATH)
     options = vision.PoseLandmarkerOptions(
         base_options=base_options,
@@ -71,81 +124,106 @@ def process_video(video_path, output_csv_path):
         min_tracking_confidence=MIN_CONFIDENCE
     )
     detector = vision.PoseLandmarker.create_from_options(options)
-
-    print(f"[DEBUG] Opening video: {video_path}")
-    cap = cv2.VideoCapture(video_path)
-    if not cap.isOpened():
-        print(f"[ERROR] Failed to open video: {video_path}")
-        return
+    
+    cap = cv2.VideoCapture(segment_path)
     fps = cap.get(cv2.CAP_PROP_FPS)
-    width, height_px = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    print(f"[DEBUG] FPS: {fps}, Width: {width}, Height: {height_px}")
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    
+    segment_data = []
+    history = []
+    frame_idx = 0
 
-    landmark_history = []
-    first_valid_landmarks = None
-    with open(output_csv_path, 'w', newline='') as f:
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret: break
+
+        timestamp_ms = int(1000 * frame_idx / fps)
+        # Calculate the actual timestamp relative to the original full video
+        abs_timestamp_ms = int((absolute_start_sec * 1000) + timestamp_ms)
+        
+        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame)
+        result = detector.detect_for_video(mp_image, timestamp_ms)
+
+        row = [frame_idx, abs_timestamp_ms]
+
+        if result.pose_landmarks:
+            landmarks = result.pose_landmarks[0]
+            current_frame_pts = [(lm.x, lm.y, lm.z, lm.visibility) for lm in landmarks]
+            
+            # Smoothing Logic
+            history.append(current_frame_pts)
+            if len(history) > SMOOTHING_WINDOW_SIZE:
+                history.pop(0)
+            
+            smoothed = smooth_landmarks(history)
+            
+            for pt in smoothed:
+                row.extend(pt)
+                # Visualization: Circle colored by confidence
+                cx, cy = int(pt[0] * width), int(pt[1] * height)
+                cv2.circle(frame, (cx, cy), 5, get_confidence_color(pt[3]), -1)
+                cv2.circle(frame, (cx, cy), 6, (255, 255, 255), 1)
+        else:
+            # If no landmarks found, fill with NaNs
+            row.extend([np.nan] * (len(LANDMARK_NAMES) * 4))
+
+        segment_data.append(row)
+        
+        # HUD
+        cv2.putText(frame, f"REPETITION #{rep_idx}", (20, 50), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.imshow("AI Trainer Analysis", frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'): break
+        frame_idx += 1
+
+    detector.close()
+    cap.release()
+    return segment_data
+
+def run_analysis():
+    """Main pipeline: TwelveLabs Detection -> Segment Extraction -> MediaPipe Processing."""
+    if not os.path.exists(OUTPUT_FOLDER):
+        os.makedirs(OUTPUT_FOLDER)
+
+    # 1. TwelveLabs Step
+    tl_detector = PushUpTimestampDetector(TWELVELABS_API_KEY)
+    rep_times = tl_detector.setup_and_get_timestamps(VIDEO_PATH)
+    
+    if not rep_times:
+        print("Pegasus could not identify any push-up repetitions.")
+        return
+
+    # 2. MediaPipe Step
+    all_rows = []
+    print(f"Beginning biomechanical extraction for {len(rep_times)} reps...")
+
+    for i, ts in enumerate(rep_times, 1):
+        seg_file = os.path.join(OUTPUT_FOLDER, f"rep_segment_{i}.mp4")
+        extract_segment(VIDEO_PATH, ts['start'], ts['end'], seg_file)
+        
+        # Analyze the cut segment
+        rep_rows = analyze_segment(seg_file, i, ts['start'])
+        all_rows.extend(rep_rows)
+        
+        # Clean up temporary segments if desired
+        if os.path.exists(seg_file):
+            os.remove(seg_file)
+
+    # 3. CSV Saving
+    with open(CSV_OUTPUT, 'w', newline='') as f:
         writer = csv.writer(f)
+        # Create Header
         header = ['frame', 'timestamp_ms']
         for name in LANDMARK_NAMES:
             header.extend([f'{name}_x', f'{name}_y', f'{name}_z', f'{name}_vis'])
-        frame_idx = 0
-        last_timestamp_ms = -1
-        wrote_metrics = False
-        while cap.isOpened():
-            ret, frame = cap.read()
-            if not ret:
-                print(f"[DEBUG] No more frames to read at frame {frame_idx}.")
-                break
-            timestamp_ms = int(1000 * frame_idx / fps)
-            if timestamp_ms <= last_timestamp_ms:
-                timestamp_ms = last_timestamp_ms + 1  # Force monotonic increase
-            last_timestamp_ms = timestamp_ms
-            mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame)
-            result = detector.detect_for_video(mp_image, timestamp_ms)
-            row = [frame_idx, timestamp_ms]
-            if result.pose_landmarks:
-                print(f"[DEBUG] Landmarks detected at frame {frame_idx}.")
-                landmarks = result.pose_landmarks[0]
-                landmarks_data = [(lm.x, lm.y, lm.z, lm.visibility) for lm in landmarks]
-                landmark_history.append(landmarks_data)
-                if not wrote_metrics:
-                    height_val, shoulder_width_val = compute_body_metrics(landmarks_data)
-                    f.write(f"# height={height_val}\n")
-                    f.write(f"# shoulder_width={shoulder_width_val}\n")
-                    writer.writerow(header)
-                    wrote_metrics = True
-                if len(landmark_history) > SMOOTHING_WINDOW_SIZE:
-                    landmark_history.pop(0)
-                smoothed_landmarks = smooth_landmarks(landmark_history)
-                for smoothed_lm in smoothed_landmarks:
-                    row.extend(smoothed_lm)
-                # Visualization (optional):
-                for lm in smoothed_landmarks:
-                    cx, cy = int(lm[0] * width), int(lm[1] * height_px)
-                    color = get_confidence_color(lm[3])
-                    cv2.circle(frame, (cx, cy), 5, color, -1)
-                    cv2.circle(frame, (cx, cy), 6, (255, 255, 255), 1)
-            else:
-                print(f"[DEBUG] No landmarks detected at frame {frame_idx}.")
-                row.extend([np.nan] * (len(LANDMARK_NAMES) * 4))
-                if not wrote_metrics:
-                    f.write(f"# height=nan\n# shoulder_width=nan\n")
-                    writer.writerow(header)
-                    wrote_metrics = True
-            cv2.putText(frame, f"MODE: TASKS_V1 (Video)", (20, 40), 1, 1.5, (0, 255, 0), 2)
-            writer.writerow(row)
-            cv2.imshow("Multi-Sport Analysis", frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'): break
-            frame_idx += 1
-    detector.close()
-    cap.release()
-    cv2.destroyAllWindows()
+        writer.writerow(header)
+        # Write Data
+        writer.writerows(all_rows)
 
-# CLI entry point for testing
+    cv2.destroyAllWindows()
+    print(f"\nAnalysis complete. Biomechanical data saved to: {CSV_OUTPUT}")
+    print("You can now run 'analysis.py' to generate advanced metrics and charts.")
+
 if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser(description="Extract pose landmarks and body metrics from video.")
-    parser.add_argument('--video', type=str, required=True, help='Path to input video file')
-    parser.add_argument('--output', type=str, required=True, help='Path to output CSV file')
-    args = parser.parse_args()
-    process_video(args.video, args.output)
+    run_analysis()
