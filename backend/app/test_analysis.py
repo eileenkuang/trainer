@@ -5,6 +5,11 @@ import pandas as pd, numpy as np
 import warnings
 warnings.filterwarnings('ignore')
 
+# Ensure script runs from correct directory
+script_dir = os.path.dirname(os.path.abspath(__file__))
+backend_dir = os.path.dirname(script_dir)
+os.chdir(backend_dir)
+
 # Set up paths
 from video_processing.analysis import process_signals, warp_signals_to_duration, SIGNAL_TOLERANCES, JOINT_WEIGHT, SYMMETRY_WEIGHT, JOINT_SIGNALS, SYMMETRY_SIGNALS, read_body_metrics_from_csv, normalize_signals
 from video_processing.video_handler import process_video
@@ -38,12 +43,14 @@ def annotation_text(signal, user_val, gt_val, tol, diff):
             return f"{signal}: {user_val:.2f} < GT {gt_val:.2f} (tol {tol:.2f}) by {abs(diff):.2f} [{pct:.1f}% over]"
     return ""
 
-def main():
+def analyze(USER_VIDEO):
     # Accept video paths as args or use defaults
-    GT_VIDEO = os.environ.get('GT_VIDEO', './video_processing/data_temp/IMG_2221.MOV')
-    USER_VIDEO = os.environ.get('USER_VIDEO', './video_processing/data_temp/2222_clip.mp4')
-    GT_CSV = './pose_outputs/gt_raw.csv'
-    USER_CSV = './pose_outputs/user_raw.csv'
+    backend_dir = os.getcwd()
+    GT_VIDEO = os.environ.get('GT_VIDEO', os.path.join(backend_dir, 'app/video_processing/data_temp/IMG_2221.MOV'))
+    if USER_VIDEO.startswith('./'):
+        USER_VIDEO = os.path.join(backend_dir, 'app', USER_VIDEO[2:])
+    GT_CSV = os.path.join(backend_dir, 'app/pose_outputs/gt_raw.csv')
+    USER_CSV = os.path.join(backend_dir, 'app/pose_outputs/user_raw.csv')
 
     print(f"Processing GT video: {GT_VIDEO}")
     process_video(GT_VIDEO, GT_CSV)
@@ -117,7 +124,10 @@ def main():
     summary_lines.append(f"User rep: start {user_rep['start_frame']}, end {user_rep['end_frame']}, max depth {user_rep['max_depth_frame']}")
 
     # Write summary to file
-    with open('./pose_outputs/final_summary.txt', 'w') as f:
+    backend_dir = os.getcwd()
+    summary_path = os.path.join(backend_dir, 'app/pose_outputs/final_summary.txt')
+    os.makedirs(os.path.dirname(summary_path), exist_ok=True)
+    with open(summary_path, 'w') as f:
         f.write('\n'.join(summary_lines))
     print("✓ final_summary.txt generated")
     user_signals = {k: v for k, v in user_results['angles'].items() if k in joint_names}
@@ -129,35 +139,35 @@ def main():
             user_signals[f'{k}_acceleration'] = v
     user_signals = normalize_signals(user_signals, user_height)
     import matplotlib.pyplot as plt
-    # --- GT Visualization ---
-    plt.figure(figsize=(16, 8))
-    for signal in signal_cols:
-        plt.plot(gt_df['frame'], gt_signals[signal], label=signal)
-    for rep in gt_reps:
-        plt.axvspan(rep['start_frame'], rep['end_frame'], color='green', alpha=0.1)
-        plt.axvline(rep['max_depth_frame'], color='red', linestyle=':', alpha=0.7)
-        plt.text(rep['max_depth_frame'], plt.ylim()[1]*0.95, f"max {rep['max_depth_frame']}", color='red', fontsize=8, ha='center')
-    plt.title('GT: All Joint Angles, Speeds, Accelerations')
-    plt.xlabel('Frame')
-    plt.ylabel('Value')
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
+    # # --- GT Visualization ---
+    # plt.figure(figsize=(16, 8))
+    # for signal in signal_cols:
+    #     plt.plot(gt_df['frame'], gt_signals[signal], label=signal)
+    # for rep in gt_reps:
+    #     plt.axvspan(rep['start_frame'], rep['end_frame'], color='green', alpha=0.1)
+    #     plt.axvline(rep['max_depth_frame'], color='red', linestyle=':', alpha=0.7)
+    #     plt.text(rep['max_depth_frame'], plt.ylim()[1]*0.95, f"max {rep['max_depth_frame']}", color='red', fontsize=8, ha='center')
+    # plt.title('GT: All Joint Angles, Speeds, Accelerations')
+    # plt.xlabel('Frame')
+    # plt.ylabel('Value')
+    # plt.legend()
+    # plt.tight_layout()
+    # plt.show()
 
-    # --- USER Visualization ---
-    plt.figure(figsize=(16, 8))
-    for signal in signal_cols:
-        plt.plot(user_df['frame'], user_signals[signal], label=signal)
-    for rep in user_reps:
-        plt.axvspan(rep['start_frame'], rep['end_frame'], color='blue', alpha=0.1)
-        plt.axvline(rep['max_depth_frame'], color='red', linestyle=':', alpha=0.7)
-        plt.text(rep['max_depth_frame'], plt.ylim()[1]*0.95, f"max {rep['max_depth_frame']}", color='red', fontsize=8, ha='center')
-    plt.title('USER: All Joint Angles, Speeds, Accelerations')
-    plt.xlabel('Frame')
-    plt.ylabel('Value')
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
+    # # --- USER Visualization ---
+    # plt.figure(figsize=(16, 8))
+    # for signal in signal_cols:
+    #     plt.plot(user_df['frame'], user_signals[signal], label=signal)
+    # for rep in user_reps:
+    #     plt.axvspan(rep['start_frame'], rep['end_frame'], color='blue', alpha=0.1)
+    #     plt.axvline(rep['max_depth_frame'], color='red', linestyle=':', alpha=0.7)
+    #     plt.text(rep['max_depth_frame'], plt.ylim()[1]*0.95, f"max {rep['max_depth_frame']}", color='red', fontsize=8, ha='center')
+    # plt.title('USER: All Joint Angles, Speeds, Accelerations')
+    # plt.xlabel('Frame')
+    # plt.ylabel('Value')
+    # plt.legend()
+    # plt.tight_layout()
+    # plt.show()
 
     # Build comparison CSV
     comparison_rows = []
@@ -192,8 +202,12 @@ def main():
                 row[f'{signal}_annotation'] = annotation_text(signal, actual, gt_val, tol, diff) if abs(diff) > tol and not np.isnan(diff) else ''
             comparison_rows.append(row)
     comparison_df = pd.DataFrame(comparison_rows)
-    comparison_df.to_csv('./pose_outputs/user_comparison.csv', index=False)
+    backend_dir = os.getcwd()
+    comparison_path = os.path.join(backend_dir, 'app/pose_outputs/user_comparison.csv')
+    os.makedirs(os.path.dirname(comparison_path), exist_ok=True)
+    comparison_df.to_csv(comparison_path, index=False)
     print(f"✓ user_comparison.csv ({len(comparison_df)} rows)")
+    return 1;
 
 if __name__ == "__main__":
-    main()
+    analyze('./video_processing/data_temp/2222_clip.mp4')

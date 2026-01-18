@@ -1,9 +1,23 @@
 body {
   background-color: #9eb3b3;
-  font-family: sans-serif;
+  font-family: "DM Sans", sans-serif;
   margin: 0;
   padding: 2rem;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
+}
+
+body.index-page {
+  background-image: url('bgimage/index.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+body.dashboard-page {
+  background-image: url('bgimage/dashboard.png');
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
 }
 
 .container {
@@ -24,14 +38,14 @@ button {
   border-radius: 9999px;
   border: none;
   cursor: pointer;
-  background-color: #d4e4e4;
+  background-color: #ECECEC;
   color: #2d3b3b;
   margin: 0.5rem;
-  font-size: 1.2rem;
+  font-family: "DM Sans", sans-serif;
 }
 
 button:hover {
-  background-color: #c4d4d4;
+  background-color: #DCDCDC;
 }
 
 #uploadBtn {
@@ -51,7 +65,8 @@ select {
   background-color: #d4e4e4;
   color: #2d3b3b;
   width: 200px;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
+  font-family: "DM Sans", sans-serif;
 }
 
 .controls-container {
@@ -65,14 +80,14 @@ select {
   padding: 0.5rem 1rem;
   border-radius: 8px;
   border: none;
-  background-color: #d4e4e4;
+  background-color: #ECECEC;
   color: #2d3b3b;
   cursor: pointer;
   width: 200px;
 }
 
 .dashboard-btn:hover {
-  background-color: #c4d4d4;
+  background-color: #DCDCDC;
 }
 
 .video-container {
@@ -103,9 +118,9 @@ pre {
 
 body {
   margin: 0;
-  font-family: sans-serif;
+  font-family: "DM Sans", sans-serif;
   background: #9aafab;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
 }
 
 .container,
@@ -121,13 +136,19 @@ h1 {
   font-size: 4rem;
 }
 
+.dashboard h1 {
+  color: #2d3b3b;
+}
+
 button,
 select {
   padding: 0.7rem 1rem;
   border-radius: 8px;
   border: none;
   cursor: pointer;
-  font-size: 1.2rem;
+  background-color: #ECECEC;
+  font-size: 1.3rem;
+  font-family: "DM Sans", sans-serif;
 }
 
 .video-container {
@@ -137,8 +158,6 @@ select {
 }
 
 .dashboard .top-section {
-  display: flex;
-  gap: 2rem;
   margin-bottom: 2rem;
 }
 
@@ -154,6 +173,31 @@ select {
 .stats p {
   color: white;
   font-size: 1.5rem;
+}
+
+.dashboard .stats p {
+  color: #2d3b3b;
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  align-items: center;
+  width: 100%;
+}
+
+.stats {
+  width: 100%;
+}
+
+.stats-row p:first-child {
+  grid-column: 1;
+}
+
+.stats-row p:last-child {
+  grid-column: 3;
+  text-align: right;
 }
 
 .cards {
@@ -176,4 +220,17 @@ select {
 
 .recommendations {
   color: white;
+  font-size: 1.3rem;
+}
+
+.dashboard .recommendations {
+  color: #2d3b3b;
+}
+
+.dashboard .recommendations ul {
+  color: #2d3b3b;
+}
+
+.video-box p {
+  font-size: 1.5rem;
 }

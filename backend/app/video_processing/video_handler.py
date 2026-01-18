@@ -134,8 +134,8 @@ def process_video(video_path, output_csv_path):
                     wrote_metrics = True
             cv2.putText(frame, f"MODE: TASKS_V1 (Video)", (20, 40), 1, 1.5, (0, 255, 0), 2)
             writer.writerow(row)
-            cv2.imshow("Multi-Sport Analysis", frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'): break
+            # cv2.imshow("Multi-Sport Analysis", frame)
+            # if cv2.waitKey(1) & 0xFF == ord('q'): break
             frame_idx += 1
     detector.close()
     cap.release()

@@ -57,6 +57,9 @@ analyzeBtn.addEventListener("click", async () => {
     return;
   }
 
+  // Show "Analyzing..." message
+  output.textContent = "Analyzing...";
+
   const formData = new FormData();
   formData.append("file", videoFile);
   formData.append("exercise", selectedExercise);
@@ -68,7 +71,17 @@ analyzeBtn.addEventListener("click", async () => {
     });
 
     const data = await res.json();
-    output.textContent = JSON.stringify(data, null, 2);
+    // Display the general_summary from final_analysis.json
+    if (data.general_summary) {
+      output.textContent = data.general_summary;
+    } else {
+      output.textContent = JSON.stringify(data, null, 2);
+    }
+    
+    // Replace video with annotated_output.mp4 if available
+    if (data.annotated_video_url) {
+      videoContainer.innerHTML = `<video src="${data.annotated_video_url}" controls></video>`;
+    }
   } catch (err) {
     output.textContent = "Error analyzing video: " + err;
   }

@@ -4,24 +4,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
   <title>Dashboard</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 
-<body>
+<body class="dashboard-page">
   <div class="dashboard">
-    <h1>Dashboard</h1>
+    <h1> <br> </h1>
 
     <div class="top-section">
-      <div class="video-box">
-        <p>Your best form:</p>
-        <video id="dashboardVideo" controls></video>
-      </div>
-
       <div class="stats">
         <a href="index.html"><button>Add Exercise</button></a>
-        <p>Streak: <span id="streak">7</span></p>
-        <p>Total days: <span id="totalDays">30</span></p>
+        <div class="stats-row">
+          <p>Streak: <span id="streak">7</span></p>
+          <p>Total days: <span id="totalDays">30</span></p>
+        </div>
       </div>
     </div>
 
