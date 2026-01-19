@@ -1,0 +1,38 @@
+{
+  "body_part_breakdown": {
+    "arms_analysis": "Arms showed consistent strength in elbow tuck and good wrist position during pushup variations. However, challenges with 'Elbow Flare' and 'Rushed Tempo' indicate a need for sustained focus on controlled eccentric movements and maintaining proper elbow mechanics under load.",
+    "legs_analysis": "Legs analysis reveals significant and recurring issues with ankle stability (both left and right), 'Excessive ankle acceleration', 'Hip sagging', and 'Excessive knee acceleration'. These indicate a general lack of control and stability in the lower body, including asymmetric movement patterns, requiring targeted foundational work.",
+    "core_analysis": "Core stability presents a dichotomy: it's a noted strength in high-scoring sessions ('Stable Core', 'Neutral Spine'), yet it's also the source of frequent breakdowns like 'Hip Sag', 'Spinal alignment breakdown', 'Lumbar stress', and general 'Core Instability'. This suggests the core performs well when fresh but struggles under fatigue or when compensating for other weaknesses, also indicated by 'Head Dropping'."
+  },
+  "recommended_plan": [
+    {
+      "exercise_name": "Weighted Pushups",
+      "reasoning": "High Frequency & Capitalizes on Strength",
+      "expected_benefit": "Increases strength and endurance, building upon mastered form in pushups."
+    },
+    {
+      "exercise_name": "Single-Leg Balance Holds",
+      "reasoning": "Fixes Weakness (Ankle Instability)",
+      "expected_benefit": "Improves ankle proprioception and strengthens stabilizing muscles, addressing recurring ankle instability."
+    },
+    {
+      "exercise_name": "Glute Bridges",
+      "reasoning": "Fixes Weakness (Hip Sagging, Lumbar Stress)",
+      "expected_benefit": "Strengthens the posterior chain and teaches proper hip engagement to prevent lower back stress."
+    },
+    {
+      "exercise_name": "Modified Plank",
+      "reasoning": "Fixes Weakness (Core Instability, Hip Sag)",
+      "expected_benefit": "Builds foundational core strength and improves the ability to maintain a rigid midline, preventing hip sag."
+    },
+    {
+      "exercise_name": "Tempo Pushups (3-1-1)",
+      "reasoning": "Reinforces Control & Addresses Rushed Tempo",
+      "expected_benefit": "Enhances muscular control throughout the movement, particularly during the eccentric phase, improving overall stability and form adherence."
+    }
+  ],
+  "current_streak_days": 4,
+  "total_exercises_completed": 15,
+  "best_workout_id": "0b53a3a8-a290-458f-89d5-ff29160145a8",
+  "best_workout_reason": "The session with ID '0b53a3a8-a290-458f-89d5-ff29160145a8' earned the highest score of 92 due to 'Perfect Depth', 'Stable Core', and 'Controlled Tempo'. The personalized summary noted it as a 'Near perfect session. Great control, depth, and alignment throughout.', demonstrating exceptional execution without any primary faults."
+}

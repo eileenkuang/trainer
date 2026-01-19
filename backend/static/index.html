@@ -1,15 +1,51 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <title>Hackathon App</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <h1>Identity Demo</h1>
+<html lang="en">
 
-  <button id="pingBtn">Ping Backend</button>
-  <pre id="output"></pre>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+  <title>MooseTrax</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body class="index-page">
+  <div class="container">
+    <h1> <br> </h1>
+
+    <!-- Controls -->
+    <div class="controls-container">
+      <select id="exerciseSelect">
+        <option value="">Select Exercise</option>
+        <option value="Squat">Squat</option>
+        <option value="Deadlift">Deadlift</option>
+        <option value="Bench Press">Bench Press</option>
+        <option value="Shoulder Press">Shoulder Press</option>
+        <option value="Lunges">Lunges</option>
+        <option value="Plank">Plank</option>
+        <option value="Push-ups">Push-ups</option>
+        <option value="Pull-ups">Pull-ups</option>
+      </select>
+      <button class="dashboard-btn" id="dashboardBtn">Dashboard</button>
+    </div>
+
+    <!-- Video Upload -->
+    <div class="video-container" id="videoContainer">
+      <button id="uploadBtn">Upload Video</button>
+      <input type="file" id="videoInput" accept="video/*" hidden />
+    </div>
+
+    <!-- Analyze Button -->
+    <div style="text-align: center; margin-bottom: 1rem;">
+      <button id="analyzeBtn">Analyze</button>
+    </div>
+
+    <pre id="output"></pre>
+  </div>
 
   <script src="main.js"></script>
 </body>
+
 </html>

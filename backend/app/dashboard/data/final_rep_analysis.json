@@ -1,0 +1,16 @@
+{
+  "video_id": "user_test_session_01",
+  "fps": 30,
+  "comparison_metrics": [
+    {
+      "timestamp_start": 5.13,
+      "timestamp_end": 7.87,
+      "rep_id": 0,
+      "deviation_score": 1.0,
+      "primary_metric": "Ankle Stability",
+      "metric_value": "0.79 vs -0.03",
+      "description": "Left ankle acceleration was 0.79, significantly exceeding the target of -0.03, indicating a lack of control.",
+      "correction_cue": "Control Ankle Movement"
+    }
+  ]
+}

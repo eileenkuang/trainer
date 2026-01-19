@@ -7,3 +7,14 @@ pandas==2.3.3
 filterpy==1.4.5
 numpy==2.2.6
 matplotlib==3.10.8
+python-multipart==0.0.6
+openai
+instructor
+pydantic
+python-dotenv
+langchain
+google-genai
+opencv-python
+numpy
+supabase
+groq

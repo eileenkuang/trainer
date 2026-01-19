@@ -1,0 +1,42 @@
+{
+  "video_id": "user_test_session_02",
+  "fps": 30,
+  "comparison_metrics": [
+    {
+      "timestamp_start": 1.5,
+      "timestamp_end": 3.0,
+      "rep_id": 1,
+      "deviation_score": 0.05,
+      "primary_metric": "general_form",
+      "metric_value": "N/A",
+      "description": "Clean repetition. Spine neutral and full range of motion."
+    },
+    {
+      "timestamp_start": 4.5,
+      "timestamp_end": 6.0,
+      "rep_id": 2,
+      "deviation_score": 0.75,
+      "primary_metric": "cervical_spine",
+      "metric_value": "45 degrees flexion",
+      "description": "Head dropping forward significantly; chin touching chest."
+    },
+    {
+      "timestamp_start": 7.5,
+      "timestamp_end": 9.0,
+      "rep_id": 3,
+      "deviation_score": 0.35,
+      "primary_metric": "lockout",
+      "metric_value": "160 degrees extension",
+      "description": "Incomplete lockout at the top position. Soft elbows."
+    },
+    {
+      "timestamp_start": 10.5,
+      "timestamp_end": 12.0,
+      "rep_id": 4,
+      "deviation_score": 0.55,
+      "primary_metric": "tempo",
+      "metric_value": "0.5s eccentric",
+      "description": "Descent was too rapid; loss of control at the bottom."
+    }
+  ]
+}

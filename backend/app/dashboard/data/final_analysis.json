@@ -1,0 +1,35 @@
+{
+  "user_skill_level": "Beginner",
+  "general_summary": "Your first rep showed great effort, but we noticed a significant deviation in left ankle stability. Focusing on controlled ankle movement will build a stronger foundation for all your exercises. Keep up the good work!",
+  "gamification": {
+    "form_score": 65,
+    "xp_earned": 50,
+    "current_level_title": "Stability Rookie",
+    "streak_bonus": false
+  },
+  "strengths": [
+    "Good effort and engagement throughout the rep."
+  ],
+  "weaknesses": [
+    "Left Ankle Stability"
+  ],
+  "remedial_plan": [
+    {
+      "name": "Single Leg Balance",
+      "target_fault": "Ankle Instability",
+      "prescription": "3 sets of 30 seconds per leg. Focus on maintaining a steady stance without wobbling.",
+      "adaptive_reasoning": "This exercise directly strengthens the small stabilizing muscles around your ankle and improves proprioception, crucial for controlling unwanted movement. Starting with static balance will build a strong foundation before progressing to dynamic movements."
+    }
+  ],
+  "timeline_events": [
+    {
+      "start_time": 5.13,
+      "end_time": 7.87,
+      "overlay_text": "Control left ankle!",
+      "detailed_explanation": "During this rep, your left ankle showed significant instability, moving excessively. To improve, focus on engaging your foot and calf muscles to keep your ankle steady, imagining your foot is rooted to the ground. This will provide a more stable base and prevent potential strain.",
+      "correction_cue": "weakness",
+      "status_color": "red"
+    }
+  ],
+  "annotated_video_filename": "user_test_session_01_annotated.mp4"
+}

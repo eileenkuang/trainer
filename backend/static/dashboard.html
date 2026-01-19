@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body class="dashboard-page">
+  <div class="dashboard">
+    <h1> <br> <br> <br> </h1>
+
+    <div class="top-section">
+      <div class="stats">
+        <a href="index.html"><button>Add Exercise</button></a>
+        <button id="refreshBtn">Refresh</button>
+        <div class="stats-row">
+          <p>Streak: <span id="streak">7</span></p>
+          <p>Total days: <span id="totalDays">30</span></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="cards">
+      <div class="card" id="armsCard">Keep your back straight during squats</div>
+      <div class="card" id="legsCard">Breathe steadily through each rep</div>
+      <div class="card" id="coreCard">Maintain proper foot positioning</div>
+    </div>
+
+    <div class="recommendations" id="recommendationsSection">
+      <h3>Recommended Exercises</h3>
+      <ul>
+        <li>Squats – 3x12</li>
+        <li>Lunges – 3x10</li>
+        <li>Planks – 3x30s</li>
+      </ul>
+    </div>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+
+</html>
